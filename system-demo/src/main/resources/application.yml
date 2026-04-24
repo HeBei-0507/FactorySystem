@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: system-demo
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.88.132:3306/device_manage_system?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+
+server:
+  port: 8080
+
+mybatis:
+  mapper-locations: classpath*:com/hebei/systemdemo/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
