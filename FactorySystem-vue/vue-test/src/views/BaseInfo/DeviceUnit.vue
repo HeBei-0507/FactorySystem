@@ -204,7 +204,8 @@ async function submitEdit() {
 }
 async function removeRows() {
   if (!selectedRows.value.length) return ElMessage.warning('请至少选择一条设备单元')
-  const ids = selectedRows.value.filter((item) => !item.isNew).map((item) => item.id)
+  const savedRows = selectedRows.value.filter((item) => !item.isNew)
+  const ids = savedRows.map((item) => Number(item.id)).filter((id) => Number.isFinite(id) && id > 0)
   const draftIds = new Set(selectedRows.value.filter((item) => item.isNew).map((item) => item.id))
   tableData.value = tableData.value.filter((item) => !draftIds.has(item.id))
   if (!ids.length) {
@@ -214,16 +215,21 @@ async function removeRows() {
     return ElMessage.success('已删除未保存的新增行')
   }
   try {
-    await batchDeleteDeviceUnit(ids)
-    console.log('删除设备单元', ids)
-    ElMessage.success('删除成功')
+    const res = await batchDeleteDeviceUnit(ids)
+    if (!res?.success) {
+      ElMessage.error(res?.errorMsg || '删除设备单元失败')
+      return
+    }
+    const deleted = res?.data?.deleted ?? ids.length
+    console.log('删除设备单元', res?.data?.ids || ids)
+    ElMessage.success('删除成功，共删除 ' + deleted + ' 条')
     creatingRowId.value = ''
     editingRowId.value = ''
     resetSelection()
     loadDeviceUnitPage()
   } catch (error) {
     console.error(error)
-    ElMessage.error('删除设备单元失败')
+    ElMessage.error(error?.response?.data?.errorMsg || error?.message || '删除设备单元失败')
   }
 }
 
@@ -286,7 +292,7 @@ onMounted(async () => {
             />
             <div class="toolbar-actions">
               <el-button type="primary" @click="submitCreate">新增</el-button>
-              <el-button type="primary" plain @click="startEdit">修改</el-button>
+              <el-button type="primary" plain @click="editingRowId ? submitEdit() : startEdit()">修改</el-button>
               <el-button type="danger" plain @click="removeRows">删除</el-button>
             </div>
           </div>

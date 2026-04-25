@@ -10,6 +10,7 @@ const currentMaintainer = '天津职业师范大学'
 const productionLines = ref([])
 const activeLineId = ref('')
 const activeUnitId = ref('')
+const expandedUnitId = ref('')
 const tableRef = ref()
 const tableData = ref([])
 const selectedRows = ref([])
@@ -42,6 +43,7 @@ const mapEq = (i) => ({
   equipmentImportance: i.equipmentImportance || '',
   repairStrategy: i.repairStrategy || '',
   overhaulTeam: i.overhaulTeam || '',
+  operateTeam: i.operateTeam || '',
   createdAt: i.createdAt || '',
   updatedAt: i.updatedAt || ''
 })
@@ -59,17 +61,16 @@ async function loadProductionLines() {
 async function clickLine(line) {
   activeLineId.value = line.id
   activeUnitId.value = ''
+  expandedUnitId.value = ''
   editingRowId.value = ''
   creatingRowId.value = ''
   resetSelection()
   try {
     const res = await getDeviceUtilList(line.id)
     line.units = (res?.data || []).map(mapUnit)
-    if (line.units.length) await clickUnit(line, line.units[0])
-    else {
-      tableData.value = []
-      pagination.total = 0
-    }
+    tableData.value = []
+    pagination.currentPage = 1
+    pagination.total = 0
   } catch (e) {
     console.error(e)
     ElMessage.error('获取设备单元列表失败')
@@ -105,6 +106,7 @@ async function loadEquipment() {
 async function clickUnit(line, unit) {
   activeLineId.value = line.id
   activeUnitId.value = unit.id
+  expandedUnitId.value = unit.id
   editingRowId.value = ''
   creatingRowId.value = ''
   filters.equipmentCode = ''
@@ -113,6 +115,14 @@ async function clickUnit(line, unit) {
   resetSelection()
   await loadEquipment()
 }
+function toggleUnit(line, unit) {
+  if (activeLineId.value !== line.id || activeUnitId.value !== unit.id) {
+    clickUnit(line, unit)
+    return
+  }
+  expandedUnitId.value = expandedUnitId.value === unit.id ? '' : unit.id
+}
+const isUnitExpanded = (unit) => expandedUnitId.value === unit.id
 const handleSelectionChange = (rows) => (selectedRows.value = rows)
 const handlePageChange = async (p) => {
   pagination.currentPage = p
@@ -139,6 +149,7 @@ function createEmptyRow() {
     equipmentImportance: '',
     repairStrategy: '',
     overhaulTeam: '',
+    operateTeam: '',
     createdAt: now(),
     updatedAt: now(),
     isNew: true
@@ -171,6 +182,7 @@ function payload(r, includeId = false) {
     equipmentImportance: r.equipmentImportance,
     repairStrategy: r.repairStrategy,
     overhaulTeam: r.overhaulTeam,
+    operateTeam: r.operateTeam,
     createdAt: r.createdAt || now(),
     updatedAt: now()
   }
@@ -248,21 +260,21 @@ loadProductionLines()
             >
               {{ line.name }}
             </div>
-            <div class="unit-list">
+            <div v-if="line.id === activeLineId" class="unit-list">
               <div
                 v-for="unit in line.units"
                 :key="unit.id"
                 :class="['unit-item', { active: unit.id === activeUnitId }]"
-                @click="clickUnit(line, unit)"
               >
-                <div class="unit-row">
-                  <span class="arrow">›</span>
+                <div class="unit-row" @click="toggleUnit(line, unit)">
+                  <span :class="['arrow', { expanded: isUnitExpanded(unit) }]">›</span>
                   <span>{{ unit.unitCode }} {{ unit.unitName }}</span>
                 </div>
-                <div class="device-list">
+                <div v-if="isUnitExpanded(unit)" class="device-list">
                   <div v-for="d in unit.devices" :key="d.id" class="device-item">
                     {{ d.equipmentCode }} {{ d.equipmentName }}
                   </div>
+                  <div v-if="!unit.devices.length" class="device-empty">暂无设备</div>
                 </div>
               </div>
             </div>
@@ -373,6 +385,12 @@ loadProductionLines()
               <span v-else>{{ row.overhaulTeam }}</span>
             </template>
           </el-table-column>
+          <el-table-column label="操作班组" min-width="130">
+            <template #default="{ row }">
+              <el-input v-if="isEditingRow(row)" v-model="row.operateTeam" size="small" />
+              <span v-else>{{ row.operateTeam }}</span>
+            </template>
+          </el-table-column>
         </el-table>
       </section>
     </div>
@@ -410,44 +428,71 @@ loadProductionLines()
   font-weight: 700;
 }
 .tree-content {
-  padding: 10px 12px;
+  padding: 14px 18px;
 }
 .line-block + .line-block {
-  margin-top: 12px;
+  margin-top: 18px;
 }
 .line-title {
-  margin-bottom: 6px;
-  font-weight: 700;
+  margin-bottom: 12px;
+  color: #1f2d3d;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
   cursor: pointer;
 }
 .line-title.active {
   color: #2f76e8;
 }
+.unit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
 .unit-item {
-  padding: 8px 10px;
-  border-radius: 4px;
+  border-radius: 5px;
+  color: #1f2d3d;
   cursor: pointer;
-}
-.unit-item:hover {
-  background: #f2f7ff;
-}
-.unit-item.active {
-  background: #eaf2ff;
-  color: #2f76e8;
 }
 .unit-row {
   display: flex;
-  gap: 6px;
-  font-weight: 700;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 800;
+}
+.unit-row:hover {
+  background: #f2f7ff;
+}
+.unit-item.active .unit-row {
+  background: #eaf2ff;
+  color: #2f76e8;
+}
+.arrow {
+  display: inline-flex;
+  width: 12px;
+  transform: rotate(0deg);
+  transition: transform 0.18s ease;
+}
+.arrow.expanded {
+  transform: rotate(90deg);
 }
 .device-list {
-  margin-top: 4px;
-  margin-left: 18px;
+  margin: 2px 0 8px 42px;
 }
-.device-item {
+.device-item,
+.device-empty {
   padding: 3px 0;
-  color: #5a6a85;
-  font-size: 12px;
+  color: #40577d;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.device-empty {
+  color: #9aa7ba;
+  font-size: 14px;
 }
 .table-panel {
   padding: 10px 12px;

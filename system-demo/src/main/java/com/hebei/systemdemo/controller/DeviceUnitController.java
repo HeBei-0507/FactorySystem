@@ -6,13 +6,9 @@ import com.hebei.systemdemo.service.IDeviceUnitService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,8 +24,20 @@ public class DeviceUnitController {
 
     @PostMapping("/addDeviceUnit")
     public Result addDeviceUnit(@Valid @RequestBody DeviceUnit deviceUnit) {
-        log.info("新增设备单元: {}", deviceUnit);
+//        log.info("新增设备单元: {}", deviceUnit);
         return deviceUnitService.addDeviceUnit(deviceUnit);
+    }
+
+    @PutMapping("/updateDeviceUnit")
+    public Result updateDeviceUnit(@Valid @RequestBody DeviceUnit deviceUnit) {
+        log.info("更新设备单元: {}", deviceUnit);
+        return deviceUnitService.updateDeviceUnit(deviceUnit);
+    }
+
+    @DeleteMapping("/deleteDeviceUnit")
+    public Result deleteDeviceUnit(@RequestBody List<Long> ids) {
+        log.info("删除设备单元: {}", ids);
+        return deviceUnitService.deleteDeviceUnit(ids);
     }
 
     @GetMapping("/page")

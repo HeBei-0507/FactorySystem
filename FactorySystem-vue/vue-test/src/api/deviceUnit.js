@@ -22,12 +22,7 @@ export const updateDeviceUnit = (data) => {
     return request.put('/deviceUnit/updateDeviceUnit', data)
 }
 
-// 删除设备管理单元
-export const deleteDeviceUnit = (id) => {
-    return request.delete(`/deviceUnit/deleteDeviceUnit/${id}`)
-}
-
 // 批量删除设备管理单元
 export const batchDeleteDeviceUnit = (ids) => {
-    return request.delete('/deviceUnit/batchDeleteDeviceUnit', { data: ids })
+    return request.delete('/deviceUnit/deleteDeviceUnit', { data: ids })
 }

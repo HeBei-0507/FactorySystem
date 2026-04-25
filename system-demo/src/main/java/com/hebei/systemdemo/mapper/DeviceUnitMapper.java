@@ -1,11 +1,13 @@
 package com.hebei.systemdemo.mapper;
 
 import com.hebei.systemdemo.pojo.DeviceUnit;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -41,4 +43,30 @@ public interface DeviceUnitMapper {
     List<DeviceUnit> page(@Param("productionLineId") Long productionLineId,
                           @Param("unitCode") String unitCode,
                           @Param("unitName") String unitName);
+
+    @Update({
+            "<script>",
+            "UPDATE device_unit",
+            "<set>",
+            "<if test='productionLineId != null'>production_line_id = #{productionLineId},</if>",
+            "<if test='unitCode != null and unitCode != \"\"'>unit_code = #{unitCode},</if>",
+            "<if test='unitName != null and unitName != \"\"'>unit_name = #{unitName},</if>",
+            "<if test='creatorId != null'>creator_id = #{creatorId},</if>",
+            "<if test='createAt != null and createAt != \"\"'>created_at = #{createAt},</if>",
+            "<if test='updateAt != null and updateAt != \"\"'>updated_at = #{updateAt},</if>",
+            "</set>",
+            "WHERE id = #{id}",
+            "</script>"
+    })
+    int updateDeviceUnit(DeviceUnit deviceUnit);
+
+    @Delete({
+            "<script>",
+            "DELETE FROM device_unit WHERE id IN",
+            "<foreach collection='ids' item='id' open='(' separator=',' close=')'>",
+            "#{id}",
+            "</foreach>",
+            "</script>"
+    })
+    int deleteDeviceUnit(@Param("ids") List<Long> ids);
 }

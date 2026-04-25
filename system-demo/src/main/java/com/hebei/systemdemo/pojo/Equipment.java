@@ -19,6 +19,7 @@ public class Equipment {
     private String equipmentImportance;
     private String repairStrategy;
     private String overhaulTeam;
+    private String operateTeam;
     private String createdAt;
     private String updatedAt;
 }

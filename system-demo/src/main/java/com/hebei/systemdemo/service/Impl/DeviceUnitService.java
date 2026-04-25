@@ -64,6 +64,46 @@ public class DeviceUnitService implements IDeviceUnitService {
         return Result.ok(data);
     }
 
+    @Override
+    public Result updateDeviceUnit(DeviceUnit deviceUnit) {
+        if (deviceUnit.getId() == null) {
+            return Result.fail("设备单元ID不能为空");
+        }
+        deviceUnit.setUnitCode(StringUtils.hasText(deviceUnit.getUnitCode()) ? deviceUnit.getUnitCode().trim() : null);
+        deviceUnit.setUnitName(StringUtils.hasText(deviceUnit.getUnitName()) ? deviceUnit.getUnitName().trim() : null);
+        deviceUnit.setCreateAt(normalizeDateTime(deviceUnit.getCreateAt()));
+        deviceUnit.setUpdateAt(normalizeDateTime(deviceUnit.getUpdateAt()));
+
+        int rows = deviceUnitMapper.updateDeviceUnit(deviceUnit);
+        if (rows <= 0) {
+            return Result.fail("更新设备单元失败，记录不存在或未发生变化");
+        }
+        return Result.ok(Collections.singletonMap("id", deviceUnit.getId()));
+    }
+
+    @Override
+    public Result deleteDeviceUnit(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Result.fail("设备单元ID列表不能为空");
+        }
+        List<Long> validIds = ids.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .toList();
+        if (validIds.isEmpty()) {
+            return Result.fail("设备单元ID列表不能为空");
+        }
+
+        int rows = deviceUnitMapper.deleteDeviceUnit(validIds);
+        if (rows <= 0) {
+            return Result.fail("删除设备单元失败，记录不存在");
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("deleted", rows);
+        data.put("ids", validIds);
+        return Result.ok(data);
+    }
+
     private String normalizeDateTime(String value) {
         if (!StringUtils.hasText(value)) {
             return null;
