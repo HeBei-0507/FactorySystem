@@ -23,4 +23,16 @@ public interface EquipmentMapper {
 
     @Delete("DELETE FROM equipment WHERE id = #{id}")
     int deleteById(Long id);
+
+    @Delete({
+            "<script>",
+            "DELETE FROM equipment WHERE id IN",
+            "<foreach collection='ids' item='id' open='(' separator=',' close=')'>",
+            "#{id}",
+            "</foreach>",
+            "</script>"
+    })
+    int deleteBatch(@Param("ids") List<Long> ids);
+
+    List<Equipment> listByLineCode(@Param("lineCode") String lineCode);
 }

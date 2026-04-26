@@ -2,13 +2,13 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getProductionlineList } from '@/api/prodectionLine'
+import { getProductionlineList } from '@/api/BaseInfo/prodectionLine'
 import {
   addDeviceUnit,
   batchDeleteDeviceUnit,
   getDeviceUnitPage,
   updateDeviceUnit
-} from '@/api/deviceUnit'
+} from '@/api/BaseInfo/deviceUnit'
 
 const currentUserId = '1'
 const currentUserName = 'zhangsan'

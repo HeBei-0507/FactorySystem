@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/equipment")
 public class EquipmentController {
@@ -30,6 +32,13 @@ public class EquipmentController {
         return equipmentService.page(current, size, unitCode, equipmentCode, equipmentName);
     }
 
+    @GetMapping("/line/{lineCode}")
+    public Result pageByLineCode(@PathVariable String lineCode,
+                                 @RequestParam Integer current,
+                                 @RequestParam Integer size) {
+        return equipmentService.pageByLineCode(current, size, lineCode);
+    }
+
     @GetMapping("/{id}")
     public Result getById(@PathVariable Long id) {
         return equipmentService.getById(id);
@@ -43,6 +52,11 @@ public class EquipmentController {
     @PutMapping("/update")
     public Result update(@RequestBody Equipment equipment) {
         return equipmentService.update(equipment);
+    }
+
+    @DeleteMapping("/batch")
+    public Result deleteBatch(@RequestBody List<Long> ids) {
+        return equipmentService.deleteBatch(ids);
     }
 
     @DeleteMapping("/{id}")

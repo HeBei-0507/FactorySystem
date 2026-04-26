@@ -45,6 +45,28 @@
         WHERE id = #{id}
     </select>
 
+    <select id="listByLineCode" resultType="com.hebei.systemdemo.pojo.Equipment">
+        SELECT
+            e.id,
+            e.unit_code,
+            e.unit_name,
+            e.equipment_code,
+            e.equipment_name,
+            e.maintainer_name,
+            e.equipment_category,
+            e.equipment_importance,
+            e.repair_strategy,
+            e.overhaul_team,
+            e.operate_team,
+            e.created_at,
+            e.updated_at
+        FROM production_line pl
+        INNER JOIN device_unit du ON du.production_line_id = pl.id
+        INNER JOIN equipment e ON e.unit_code = du.unit_code
+        WHERE pl.line_code = #{lineCode}
+        ORDER BY e.id DESC
+    </select>
+
     <insert id="add" parameterType="com.hebei.systemdemo.pojo.Equipment" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO equipment
         <trim prefix="(" suffix=")" suffixOverrides=",">
