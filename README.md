@@ -1,2 +1,2 @@
 # FactorySystem
-一个工厂系统
+一个点检系统
