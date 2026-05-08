@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.DailyInspectionFrequencyMapper">
+
+    <insert id="addDailyInspectionFrequency"
+            parameterType="com.hebei.systemdemo.domain.po.DailyInspectionFrequency"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO daily_inspection_frequency
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            daily_inspection_table_id,
+            frequency_code,
+            area_device_name,
+            <if test="inspectionContent != null">inspection_content,</if>
+            <if test="inspectionStandard != null">inspection_standard,</if>
+            <if test="dataType != null">data_type,</if>
+            <if test="cycleUnit != null">cycle_unit,</if>
+            <if test="frequencyValue != null">frequency_value,</if>
+            <if test="monthDateSet != null">month_date_set,</if>
+            <if test="weekDateSet != null">week_date_set,</if>
+            <if test="shiftsSet != null">shifts_set,</if>
+            <if test="maximums != null">maximums,</if>
+            <if test="minimums != null">minimums,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{dailyInspectionTableId},
+            #{frequencyCode},
+            #{areaDeviceName},
+            <if test="inspectionContent != null">#{inspectionContent},</if>
+            <if test="inspectionStandard != null">#{inspectionStandard},</if>
+            <if test="dataType != null">#{dataType},</if>
+            <if test="cycleUnit != null">#{cycleUnit},</if>
+            <if test="frequencyValue != null">#{frequencyValue},</if>
+            <if test="monthDateSet != null">#{monthDateSet},</if>
+            <if test="weekDateSet != null">#{weekDateSet},</if>
+            <if test="shiftsSet != null">#{shiftsSet},</if>
+            <if test="maximums != null">#{maximums},</if>
+            <if test="minimums != null">#{minimums},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.DailyInspectionFrequency">
+        SELECT
+            dif.id,
+            dif.daily_inspection_table_id AS dailyInspectionTableId,
+            dif.frequency_code,
+            dif.area_device_name,
+            dif.inspection_content,
+            dif.inspection_standard,
+            dif.data_type,
+            dif.cycle_unit,
+            dif.frequency_value,
+            dif.month_date_set,
+            dif.week_date_set,
+            dif.shifts_set,
+            dif.maximums,
+            dif.minimums,
+            dif.creator_id,
+            dif.created_at AS createdAt,
+            dif.updated_at AS updatedAt
+        FROM daily_inspection_frequency dif
+        WHERE dif.id = #{id}
+        <if test="creatorId != null">
+            AND dif.creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <update id="updateDailyInspectionFrequency" parameterType="com.hebei.systemdemo.domain.po.DailyInspectionFrequency">
+        UPDATE daily_inspection_frequency
+        <set>
+            <if test="areaDeviceName != null and areaDeviceName != ''">area_device_name = #{areaDeviceName},</if>
+            <if test="inspectionContent != null">inspection_content = #{inspectionContent},</if>
+            <if test="inspectionStandard != null">inspection_standard = #{inspectionStandard},</if>
+            <if test="dataType != null">data_type = #{dataType},</if>
+            <if test="cycleUnit != null">cycle_unit = #{cycleUnit},</if>
+            <if test="frequencyValue != null">frequency_value = #{frequencyValue},</if>
+            <if test="monthDateSet != null">month_date_set = #{monthDateSet},</if>
+            <if test="weekDateSet != null">week_date_set = #{weekDateSet},</if>
+            <if test="shiftsSet != null">shifts_set = #{shiftsSet},</if>
+            <if test="maximums != null">maximums = #{maximums},</if>
+            <if test="minimums != null">minimums = #{minimums},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.DailyInspectionFrequency">
+        SELECT
+            dif.id,
+            dif.daily_inspection_table_id AS dailyInspectionTableId,
+            dif.frequency_code,
+            dif.area_device_name,
+            dif.inspection_content,
+            dif.inspection_standard,
+            dif.data_type,
+            dif.cycle_unit,
+            dif.frequency_value,
+            dif.month_date_set,
+            dif.week_date_set,
+            dif.shifts_set,
+            dif.maximums,
+            dif.minimums,
+            dif.creator_id,
+            dif.created_at AS createdAt,
+            dif.updated_at AS updatedAt,
+            su.real_name AS creatorName,
+            su.username AS creatorUsername
+        FROM daily_inspection_frequency dif
+        LEFT JOIN sys_user su ON dif.creator_id = su.id
+        <where>
+            <if test="creatorId != null">
+                AND dif.creator_id = #{creatorId}
+            </if>
+            <if test="dailyInspectionTableId != null">
+                AND dif.daily_inspection_table_id = #{dailyInspectionTableId}
+            </if>
+            <if test="frequencyCode != null and frequencyCode != ''">
+                AND dif.frequency_code LIKE CONCAT('%', #{frequencyCode}, '%')
+            </if>
+            <if test="areaDeviceName != null and areaDeviceName != ''">
+                AND dif.area_device_name LIKE CONCAT('%', #{areaDeviceName}, '%')
+            </if>
+        </where>
+        ORDER BY dif.id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.DailyInspectionFrequency">
+        SELECT
+            id,
+            daily_inspection_table_id AS dailyInspectionTableId,
+            frequency_code,
+            area_device_name,
+            inspection_content,
+            inspection_standard,
+            data_type,
+            cycle_unit,
+            frequency_value,
+            month_date_set,
+            week_date_set,
+            shifts_set,
+            maximums,
+            minimums,
+            creator_id,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM daily_inspection_frequency
+        <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
+            <if test="dailyInspectionTableId != null">
+                AND daily_inspection_table_id = #{dailyInspectionTableId}
+            </if>
+            <if test="frequencyCode != null and frequencyCode != ''">
+                AND frequency_code = #{frequencyCode}
+            </if>
+        </where>
+    </select>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM daily_inspection_frequency
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

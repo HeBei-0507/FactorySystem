@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.EquipmentMapper">
+
+    <sql id="equipmentSelect">
+        SELECT e.id,
+               e.device_unit_id AS deviceUnitId,
+               e.unit_code,
+               e.unit_name,
+               e.equipment_code,
+               e.equipment_name,
+               e.maintainer_name,
+               e.equipment_category,
+               e.equipment_importance,
+               e.repair_strategy,
+               e.overhaul_team,
+               e.act_team,
+               e.creator_id,
+               e.created_at,
+               e.updated_at
+        FROM equipment e
+    </sql>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.Equipment">
+        <include refid="equipmentSelect"/>
+        <where>
+            <if test="creatorId != null">AND e.creator_id = #{creatorId}</if>
+            <if test="deviceUnitId != null">AND e.device_unit_id = #{deviceUnitId}</if>
+            <if test="equipmentCode != null and equipmentCode != ''">AND e.equipment_code LIKE CONCAT('%', #{equipmentCode}, '%')</if>
+            <if test="equipmentName != null and equipmentName != ''">AND e.equipment_name LIKE CONCAT('%', #{equipmentName}, '%')</if>
+            <if test="equipmentCategory != null and equipmentCategory != ''">AND e.equipment_category LIKE CONCAT('%', #{equipmentCategory}, '%')</if>
+            <if test="equipmentImportance != null and equipmentImportance != ''">AND e.equipment_importance LIKE CONCAT('%', #{equipmentImportance}, '%')</if>
+            <if test="repairStrategy != null and repairStrategy != ''">AND e.repair_strategy LIKE CONCAT('%', #{repairStrategy}, '%')</if>
+            <if test="overhaulTeam != null and overhaulTeam != ''">AND e.overhaul_team LIKE CONCAT('%', #{overhaulTeam}, '%')</if>
+            <if test="actTeam != null and actTeam != ''">AND e.act_team LIKE CONCAT('%', #{actTeam}, '%')</if>
+        </where>
+        ORDER BY e.id DESC
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.Equipment">
+        <include refid="equipmentSelect"/>
+        <where>
+            e.id = #{id}
+            <if test="creatorId != null">AND e.creator_id = #{creatorId}</if>
+        </where>
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.Equipment">
+        <include refid="equipmentSelect"/>
+        <where>
+            <if test="deviceUnitId != null">AND e.device_unit_id = #{deviceUnitId}</if>
+            <if test="unitCode != null and unitCode != ''">AND e.unit_code = #{unitCode}</if>
+            <if test="equipmentCode != null and equipmentCode != ''">AND e.equipment_code = #{equipmentCode}</if>
+            <if test="equipmentName != null and equipmentName != ''">AND e.equipment_name = #{equipmentName}</if>
+            <if test="creatorId != null">AND e.creator_id = #{creatorId}</if>
+        </where>
+        ORDER BY e.id DESC
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.Equipment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO equipment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            device_unit_id, unit_code, unit_name, equipment_code, equipment_name,
+            <if test="maintainerName != null and maintainerName != ''">maintainer_name,</if>
+            <if test="equipmentCategory != null and equipmentCategory != ''">equipment_category,</if>
+            <if test="equipmentImportance != null and equipmentImportance != ''">equipment_importance,</if>
+            <if test="repairStrategy != null and repairStrategy != ''">repair_strategy,</if>
+            <if test="overhaulTeam != null and overhaulTeam != ''">overhaul_team,</if>
+            <if test="actTeam != null and actTeam != ''">act_team,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{deviceUnitId}, #{unitCode}, #{unitName}, #{equipmentCode}, #{equipmentName},
+            <if test="maintainerName != null and maintainerName != ''">#{maintainerName},</if>
+            <if test="equipmentCategory != null and equipmentCategory != ''">#{equipmentCategory},</if>
+            <if test="equipmentImportance != null and equipmentImportance != ''">#{equipmentImportance},</if>
+            <if test="repairStrategy != null and repairStrategy != ''">#{repairStrategy},</if>
+            <if test="overhaulTeam != null and overhaulTeam != ''">#{overhaulTeam},</if>
+            <if test="actTeam != null and actTeam != ''">#{actTeam},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.Equipment">
+        UPDATE equipment
+        <set>
+            <if test="deviceUnitId != null">device_unit_id = #{deviceUnitId},</if>
+            <if test="unitCode != null and unitCode != ''">unit_code = #{unitCode},</if>
+            <if test="unitName != null and unitName != ''">unit_name = #{unitName},</if>
+            <if test="equipmentCode != null and equipmentCode != ''">equipment_code = #{equipmentCode},</if>
+            <if test="equipmentName != null and equipmentName != ''">equipment_name = #{equipmentName},</if>
+            <if test="maintainerName != null">maintainer_name = #{maintainerName},</if>
+            <if test="equipmentCategory != null">equipment_category = #{equipmentCategory},</if>
+            <if test="equipmentImportance != null">equipment_importance = #{equipmentImportance},</if>
+            <if test="repairStrategy != null">repair_strategy = #{repairStrategy},</if>
+            <if test="overhaulTeam != null">overhaul_team = #{overhaulTeam},</if>
+            <if test="actTeam != null">act_team = #{actTeam},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">DELETE FROM equipment WHERE id = #{id}</delete>
+
+    <select id="listByLineCode" resultType="com.hebei.systemdemo.domain.po.Equipment">
+        <include refid="equipmentSelect"/>
+        INNER JOIN device_unit du ON e.device_unit_id = du.id
+        INNER JOIN production_line pl ON du.production_line_id = pl.id
+        <where>
+            pl.line_code = #{lineCode}
+            <if test="creatorId != null">AND e.creator_id = #{creatorId}</if>
+            <if test="equipmentCode != null and equipmentCode != ''">AND e.equipment_code LIKE CONCAT('%', #{equipmentCode}, '%')</if>
+            <if test="equipmentName != null and equipmentName != ''">AND e.equipment_name LIKE CONCAT('%', #{equipmentName}, '%')</if>
+            <if test="equipmentCategory != null and equipmentCategory != ''">AND e.equipment_category LIKE CONCAT('%', #{equipmentCategory}, '%')</if>
+            <if test="equipmentImportance != null and equipmentImportance != ''">AND e.equipment_importance LIKE CONCAT('%', #{equipmentImportance}, '%')</if>
+            <if test="repairStrategy != null and repairStrategy != ''">AND e.repair_strategy LIKE CONCAT('%', #{repairStrategy}, '%')</if>
+            <if test="overhaulTeam != null and overhaulTeam != ''">AND e.overhaul_team LIKE CONCAT('%', #{overhaulTeam}, '%')</if>
+            <if test="actTeam != null and actTeam != ''">AND e.act_team LIKE CONCAT('%', #{actTeam}, '%')</if>
+        </where>
+        ORDER BY e.id DESC
+    </select>
+
+    <select id="getByEquipmentCodeAndCreatorId" resultType="com.hebei.systemdemo.domain.po.Equipment">
+        <include refid="equipmentSelect"/>
+        <where>
+            e.equipment_code = #{equipmentCode}
+            AND e.creator_id = #{creatorId}
+        </where>
+        LIMIT 1
+    </select>
+</mapper>

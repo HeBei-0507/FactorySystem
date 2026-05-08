@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.FailureDealMapper">
+
+    <select id="getByFailureId" resultType="com.hebei.systemdemo.domain.po.FailureDeal">
+        SELECT
+            id,
+            failure_id AS failureId,
+            severity_level AS severityLevel,
+            process_time AS processTime,
+            process_description AS processDescription,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM failure_deal
+        WHERE failure_id = #{failureId}
+        LIMIT 1
+    </select>
+
+    <delete id="deleteByFailureId">
+        DELETE FROM failure_deal WHERE failure_id = #{failureId}
+    </delete>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.FailureDeal" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO failure_deal (
+            failure_id,
+            severity_level,
+            process_time,
+            process_description,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{failureId},
+            #{severityLevel},
+            #{processTime},
+            #{processDescription},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateByFailureId" parameterType="com.hebei.systemdemo.domain.po.FailureDeal">
+        UPDATE failure_deal
+        <set>
+            <if test="severityLevel != null">severity_level = #{severityLevel},</if>
+            <if test="processTime != null">process_time = #{processTime},</if>
+            <if test="processDescription != null">process_description = #{processDescription},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE failure_id = #{failureId}
+    </update>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.Failure">
+        SELECT
+            f.id,
+            f.failure_code AS failureCode,
+            f.device_part_code AS devicePartCode,
+            f.device_part_name AS devicePartName,
+            f.failure_name AS failureName,
+            f.failure_phenomenon AS failurePhenomenon,
+            f.failure_description AS failureDescription,
+            f.failure_notice_type AS failureNoticeType,
+            f.failure_type AS failureType,
+            f.failure_start_time AS failureStartTime,
+            f.status,
+            f.creator_username AS creatorUsername,
+            f.creator_name AS creatorName,
+            f.created_at AS createdAt,
+            f.updated_at AS updatedAt,
+            d.severity_level AS severityLevel,
+            d.process_time AS processTime,
+            d.process_description AS processDescription
+        FROM failure_record f
+        LEFT JOIN failure_deal d ON d.failure_id = f.id
+        <where>
+            <if test="creatorUsername != null and creatorUsername != ''">
+                AND f.creator_username = #{creatorUsername}
+            </if>
+            <if test="failureCode != null and failureCode != ''">
+                AND f.failure_code LIKE CONCAT('%', #{failureCode}, '%')
+            </if>
+            <if test="devicePartCode != null and devicePartCode != ''">
+                AND f.device_part_code LIKE CONCAT('%', #{devicePartCode}, '%')
+            </if>
+            <if test="failureName != null and failureName != ''">
+                AND f.failure_name LIKE CONCAT('%', #{failureName}, '%')
+            </if>
+            <if test="failureStartTime != null and failureStartTime != ''">
+                AND DATE(f.failure_start_time) = #{failureStartTime}
+            </if>
+            <if test="status != null and status != ''">
+                AND f.status = #{status}
+            </if>
+            <if test="failureType != null and failureType != ''">
+                AND f.failure_type = #{failureType}
+            </if>
+        </where>
+        ORDER BY f.id DESC
+    </select>
+
+    <select id="approvePage" resultType="com.hebei.systemdemo.domain.po.Failure">
+        SELECT
+            f.id,
+            f.failure_code AS failureCode,
+            f.device_part_code AS devicePartCode,
+            f.device_part_name AS devicePartName,
+            f.failure_name AS failureName,
+            f.failure_phenomenon AS failurePhenomenon,
+            f.failure_description AS failureDescription,
+            f.failure_notice_type AS failureNoticeType,
+            f.failure_type AS failureType,
+            f.failure_start_time AS failureStartTime,
+            f.status,
+            f.creator_username AS creatorUsername,
+            f.creator_name AS creatorName,
+            f.created_at AS createdAt,
+            f.updated_at AS updatedAt,
+            d.severity_level AS severityLevel,
+            d.process_time AS processTime,
+            d.process_description AS processDescription
+        FROM failure_record f
+        LEFT JOIN failure_deal d ON d.failure_id = f.id
+        <where>
+            AND f.status IN ('02', '03')
+            <if test="creatorUsername != null and creatorUsername != ''">
+                AND f.creator_username = #{creatorUsername}
+            </if>
+            <if test="failureCode != null and failureCode != ''">
+                AND f.failure_code LIKE CONCAT('%', #{failureCode}, '%')
+            </if>
+            <if test="devicePartCode != null and devicePartCode != ''">
+                AND f.device_part_code LIKE CONCAT('%', #{devicePartCode}, '%')
+            </if>
+            <if test="failureName != null and failureName != ''">
+                AND f.failure_name LIKE CONCAT('%', #{failureName}, '%')
+            </if>
+            <if test="failureStartTime != null and failureStartTime != ''">
+                AND DATE(f.failure_start_time) = #{failureStartTime}
+            </if>
+            <if test="status != null and status != ''">
+                AND f.status = #{status}
+            </if>
+            <if test="failureType != null and failureType != ''">
+                AND f.failure_type = #{failureType}
+            </if>
+        </where>
+        ORDER BY f.id DESC
+    </select>
+</mapper>

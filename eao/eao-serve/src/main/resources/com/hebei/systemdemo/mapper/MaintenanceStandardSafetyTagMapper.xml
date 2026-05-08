@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenanceStandardSafetyTagMapper">
+    <select id="listByStandardId" resultType="com.hebei.systemdemo.domain.po.MaintenanceStandardSafetyTag">
+        SELECT id, standard_id AS standardId, tag_nature AS tagNature, tag_location AS tagLocation,
+               tag_device_code AS tagDeviceCode, created_at AS createdAt, updated_at AS updatedAt
+        FROM maintenance_standard_safety_tag
+        WHERE standard_id = #{standardId}
+        ORDER BY id DESC
+    </select>
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenanceStandardSafetyTag" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_standard_safety_tag (
+            standard_id, tag_nature, tag_location, tag_device_code, created_at, updated_at
+        ) VALUES (
+            #{standardId}, #{tagNature}, #{tagLocation}, #{tagDeviceCode}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+    <delete id="deleteByStandardId">
+        DELETE FROM maintenance_standard_safety_tag WHERE standard_id = #{standardId}
+    </delete>
+</mapper>

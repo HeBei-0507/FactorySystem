@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.InspectionStandardMapper">
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.InspectionStandard" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inspection_standard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            inspection_name, part_code,
+            <if test="partName != null">part_name,</if>
+            <if test="implementationCycle != null">implementation_cycle,</if>
+            <if test="cycleUnit != null">cycle_unit,</if>
+            <if test="dataType != null">data_type,</if>
+            <if test="signalType != null">signal_type,</if>
+            <if test="implementationMethod != null">implementation_method,</if>
+            <if test="inspectionContent != null">inspection_content,</if>
+            <if test="inspectionPart != null">inspection_part,</if>
+            <if test="qualitativeStandard != null">qualitative_standard,</if>
+            <if test="standardCategory != null">standard_category,</if>
+            <if test="quantitativeStandard != null">quantitative_standard,</if>
+            <if test="unitOfMeasurement != null">unit_of_measurement,</if>
+            <if test="profession != null">profession,</if>
+            <if test="upperLimit != null">upper_limit,</if>
+            <if test="lowerLimit != null">lower_limit,</if>
+            <if test="idLocationCode != null">id_location_code,</if>
+            <if test="idLocationName != null">id_location_name,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{inspectionName}, #{partCode},
+            <if test="partName != null">#{partName},</if>
+            <if test="implementationCycle != null">#{implementationCycle},</if>
+            <if test="cycleUnit != null">#{cycleUnit},</if>
+            <if test="dataType != null">#{dataType},</if>
+            <if test="signalType != null">#{signalType},</if>
+            <if test="implementationMethod != null">#{implementationMethod},</if>
+            <if test="inspectionContent != null">#{inspectionContent},</if>
+            <if test="inspectionPart != null">#{inspectionPart},</if>
+            <if test="qualitativeStandard != null">#{qualitativeStandard},</if>
+            <if test="standardCategory != null">#{standardCategory},</if>
+            <if test="quantitativeStandard != null">#{quantitativeStandard},</if>
+            <if test="unitOfMeasurement != null">#{unitOfMeasurement},</if>
+            <if test="profession != null">#{profession},</if>
+            <if test="upperLimit != null">#{upperLimit},</if>
+            <if test="lowerLimit != null">#{lowerLimit},</if>
+            <if test="idLocationCode != null">#{idLocationCode},</if>
+            <if test="idLocationName != null">#{idLocationName},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.InspectionStandard">
+        SELECT ins.id, ins.inspection_name AS inspectionName, ins.part_code AS partCode, ins.part_name AS partName,
+               ins.implementation_cycle AS implementationCycle, ins.cycle_unit AS cycleUnit, ins.data_type AS dataType,
+               ins.signal_type AS signalType, ins.implementation_method AS implementationMethod,
+               ins.inspection_content AS inspectionContent, ins.inspection_part AS inspectionPart,
+               ins.qualitative_standard AS qualitativeStandard, ins.standard_category AS standardCategory,
+               ins.quantitative_standard AS quantitativeStandard, ins.unit_of_measurement AS unitOfMeasurement,
+               ins.profession, ins.upper_limit AS upperLimit, ins.lower_limit AS lowerLimit,
+               ins.id_location_code AS idLocationCode, ins.id_location_name AS idLocationName,
+               ins.creator_id AS creatorId, ins.created_at AS createdAt, ins.updated_at AS updatedAt
+        FROM inspection_standard ins
+        WHERE ins.id = #{id}
+        <if test="creatorId != null">
+            AND ins.creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.InspectionStandard">
+        UPDATE inspection_standard
+        <set>
+            <if test="inspectionName != null and inspectionName != ''">inspection_name = #{inspectionName},</if>
+            <if test="partCode != null and partCode != ''">part_code = #{partCode},</if>
+            <if test="partName != null">part_name = #{partName},</if>
+            <if test="implementationCycle != null">implementation_cycle = #{implementationCycle},</if>
+            <if test="cycleUnit != null">cycle_unit = #{cycleUnit},</if>
+            <if test="dataType != null">data_type = #{dataType},</if>
+            <if test="signalType != null">signal_type = #{signalType},</if>
+            <if test="implementationMethod != null">implementation_method = #{implementationMethod},</if>
+            <if test="inspectionContent != null">inspection_content = #{inspectionContent},</if>
+            <if test="inspectionPart != null">inspection_part = #{inspectionPart},</if>
+            <if test="qualitativeStandard != null">qualitative_standard = #{qualitativeStandard},</if>
+            <if test="standardCategory != null">standard_category = #{standardCategory},</if>
+            <if test="quantitativeStandard != null">quantitative_standard = #{quantitativeStandard},</if>
+            <if test="unitOfMeasurement != null">unit_of_measurement = #{unitOfMeasurement},</if>
+            <if test="profession != null">profession = #{profession},</if>
+            <if test="upperLimit != null">upper_limit = #{upperLimit},</if>
+            <if test="lowerLimit != null">lower_limit = #{lowerLimit},</if>
+            <if test="idLocationCode != null">id_location_code = #{idLocationCode},</if>
+            <if test="idLocationName != null">id_location_name = #{idLocationName},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">DELETE FROM inspection_standard WHERE id = #{id}</delete>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.InspectionStandard">
+        SELECT ins.id, ins.inspection_name AS inspectionName, ins.part_code AS partCode, ins.part_name AS partName,
+               ins.implementation_cycle AS implementationCycle, ins.cycle_unit AS cycleUnit, ins.data_type AS dataType,
+               ins.signal_type AS signalType, ins.implementation_method AS implementationMethod,
+               ins.inspection_content AS inspectionContent, ins.inspection_part AS inspectionPart,
+               ins.qualitative_standard AS qualitativeStandard, ins.standard_category AS standardCategory,
+               ins.quantitative_standard AS quantitativeStandard, ins.unit_of_measurement AS unitOfMeasurement,
+               ins.profession, ins.upper_limit AS upperLimit, ins.lower_limit AS lowerLimit,
+               ins.id_location_code AS idLocationCode, ins.id_location_name AS idLocationName,
+               ins.creator_id AS creatorId, ins.created_at AS createdAt, ins.updated_at AS updatedAt,
+               su.real_name AS creatorName, su.username AS creatorUsername
+        FROM inspection_standard ins
+        LEFT JOIN sys_user su ON ins.creator_id = su.id
+        <where>
+            <if test="creatorId != null">AND ins.creator_id = #{creatorId}</if>
+            <if test="inspectionName != null and inspectionName != ''">AND ins.inspection_name LIKE CONCAT('%', #{inspectionName}, '%')</if>
+            <if test="partCode != null and partCode != ''">AND ins.part_code = #{partCode}</if>
+            <if test="partCodes != null and partCodes.size() > 0">AND ins.part_code IN <foreach collection="partCodes" item="code" open="(" separator="," close=")">#{code}</foreach></if>
+            <if test="partName != null and partName != ''">AND ins.part_name LIKE CONCAT('%', #{partName}, '%')</if>
+            <if test="cycleUnit != null and cycleUnit != ''">AND ins.cycle_unit = #{cycleUnit}</if>
+            <if test="dataType != null and dataType != ''">AND ins.data_type = #{dataType}</if>
+            <if test="signalType != null and signalType != ''">AND ins.signal_type = #{signalType}</if>
+            <if test="implementationMethod != null and implementationMethod != ''">AND ins.implementation_method = #{implementationMethod}</if>
+            <if test="standardCategory != null and standardCategory != ''">AND ins.standard_category = #{standardCategory}</if>
+            <if test="unitOfMeasurement != null and unitOfMeasurement != ''">AND ins.unit_of_measurement = #{unitOfMeasurement}</if>
+            <if test="profession != null and profession != ''">AND ins.profession = #{profession}</if>
+        </where>
+        ORDER BY ins.id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.InspectionStandard">
+        SELECT id, inspection_name AS inspectionName, part_code AS partCode, part_name AS partName,
+               implementation_cycle AS implementationCycle, cycle_unit AS cycleUnit, data_type AS dataType,
+               signal_type AS signalType, implementation_method AS implementationMethod,
+               inspection_content AS inspectionContent, inspection_part AS inspectionPart,
+               qualitative_standard AS qualitativeStandard, standard_category AS standardCategory,
+               quantitative_standard AS quantitativeStandard, unit_of_measurement AS unitOfMeasurement,
+               profession, upper_limit AS upperLimit, lower_limit AS lowerLimit,
+               id_location_code AS idLocationCode, id_location_name AS idLocationName,
+               creator_id AS creatorId, created_at AS createdAt, updated_at AS updatedAt
+        FROM inspection_standard
+        <where>
+            <if test="partCode != null and partCode != ''">AND part_code = #{partCode}</if>
+        </where>
+    </select>
+</mapper>

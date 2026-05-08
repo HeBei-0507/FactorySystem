@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenanceStandardSparePartMapper">
+    <select id="listByStandardId" resultType="com.hebei.systemdemo.domain.po.MaintenanceStandardSparePart">
+        SELECT id, standard_id AS standardId, material_code_id AS materialCodeId, inbound_request_id AS inboundRequestId,
+               material_code AS materialCode, material_name AS materialName, material_sub_category AS materialSubCategory,
+               model_specification AS modelSpecification, quantity, quantity_unit AS quantityUnit,
+               created_at AS createdAt, updated_at AS updatedAt
+        FROM maintenance_standard_spare_part
+        WHERE standard_id = #{standardId}
+        ORDER BY id DESC
+    </select>
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenanceStandardSparePart" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_standard_spare_part (
+            standard_id, material_code_id, inbound_request_id, material_code, material_name,
+            material_sub_category, model_specification, quantity, quantity_unit, created_at, updated_at
+        ) VALUES (
+            #{standardId}, #{materialCodeId}, #{inboundRequestId}, #{materialCode}, #{materialName},
+            #{materialSubCategory}, #{modelSpecification}, #{quantity}, #{quantityUnit}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+    <delete id="deleteByStandardId">
+        DELETE FROM maintenance_standard_spare_part WHERE standard_id = #{standardId}
+    </delete>
+</mapper>

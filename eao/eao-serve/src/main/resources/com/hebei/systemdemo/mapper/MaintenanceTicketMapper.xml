@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenanceTicketMapper">
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.MaintenanceTicket">
+        SELECT
+            id,
+            ticket_code AS ticketCode,
+            ticket_name AS ticketName,
+            status,
+            maintenance_plan_name AS maintenancePlanName,
+            operation_team AS operationTeam,
+            task_type AS taskType,
+            production_impact AS productionImpact,
+            entrust_type AS entrustType,
+            maintenance_resource AS maintenanceResource,
+            maintenance_content AS maintenanceContent,
+            abnormal_phenomenon AS abnormalPhenomenon,
+            handling_opinion AS handlingOpinion,
+            plan_id AS planId,
+            plan_code AS planCode,
+            maintenance_category AS maintenanceCategory,
+            maintenance_start_time AS maintenanceStartTime,
+            maintenance_end_time AS maintenanceEndTime,
+            standard_id AS standardId,
+            standard_code AS standardCode,
+            part_code AS partCode,
+            part_name AS partName,
+            item_name AS itemName,
+            profession,
+            risk_factor AS riskFactor,
+            safety_measure AS safetyMeasure,
+            work_category AS workCategory,
+            acceptance_level AS acceptanceLevel,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM maintenance_ticket
+        <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
+            <if test="ticketCode != null and ticketCode != ''">
+                AND ticket_code LIKE CONCAT('%', #{ticketCode}, '%')
+            </if>
+            <if test="ticketName != null and ticketName != ''">
+                AND ticket_name LIKE CONCAT('%', #{ticketName}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="partCode != null and partCode != ''">
+                AND part_code LIKE CONCAT('%', #{partCode}, '%')
+            </if>
+            <if test="partName != null and partName != ''">
+                AND part_name LIKE CONCAT('%', #{partName}, '%')
+            </if>
+            <if test="standardCode != null and standardCode != ''">
+                AND standard_code LIKE CONCAT('%', #{standardCode}, '%')
+            </if>
+            <if test="planCode != null and planCode != ''">
+                AND plan_code LIKE CONCAT('%', #{planCode}, '%')
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.MaintenanceTicket">
+        SELECT
+            id,
+            ticket_code AS ticketCode,
+            ticket_name AS ticketName,
+            status,
+            maintenance_plan_name AS maintenancePlanName,
+            operation_team AS operationTeam,
+            task_type AS taskType,
+            production_impact AS productionImpact,
+            entrust_type AS entrustType,
+            maintenance_resource AS maintenanceResource,
+            maintenance_content AS maintenanceContent,
+            abnormal_phenomenon AS abnormalPhenomenon,
+            handling_opinion AS handlingOpinion,
+            plan_id AS planId,
+            plan_code AS planCode,
+            maintenance_category AS maintenanceCategory,
+            maintenance_start_time AS maintenanceStartTime,
+            maintenance_end_time AS maintenanceEndTime,
+            standard_id AS standardId,
+            standard_code AS standardCode,
+            part_code AS partCode,
+            part_name AS partName,
+            item_name AS itemName,
+            profession,
+            risk_factor AS riskFactor,
+            safety_measure AS safetyMeasure,
+            work_category AS workCategory,
+            acceptance_level AS acceptanceLevel,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM maintenance_ticket
+        WHERE id = #{id}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenanceTicket" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_ticket (
+            ticket_code, ticket_name, status, maintenance_plan_name, operation_team, task_type,
+            production_impact, entrust_type, maintenance_resource, maintenance_content,
+            abnormal_phenomenon, handling_opinion, plan_id, plan_code, maintenance_category,
+            maintenance_start_time, maintenance_end_time, standard_id, standard_code,
+            part_code, part_name, item_name, profession, risk_factor, safety_measure,
+            work_category, acceptance_level, creator_id, creator_username, creator_name,
+            created_at, updated_at
+        ) VALUES (
+            #{ticketCode}, #{ticketName}, #{status}, #{maintenancePlanName}, #{operationTeam}, #{taskType},
+            #{productionImpact}, #{entrustType}, #{maintenanceResource}, #{maintenanceContent},
+            #{abnormalPhenomenon}, #{handlingOpinion}, #{planId}, #{planCode}, #{maintenanceCategory},
+            #{maintenanceStartTime}, #{maintenanceEndTime}, #{standardId}, #{standardCode},
+            #{partCode}, #{partName}, #{itemName}, #{profession}, #{riskFactor}, #{safetyMeasure},
+            #{workCategory}, #{acceptanceLevel}, #{creatorId}, #{creatorUsername}, #{creatorName},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.MaintenanceTicket">
+        UPDATE maintenance_ticket
+        <set>
+            <if test="ticketName != null">ticket_name = #{ticketName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="maintenancePlanName != null">maintenance_plan_name = #{maintenancePlanName},</if>
+            <if test="operationTeam != null">operation_team = #{operationTeam},</if>
+            <if test="taskType != null">task_type = #{taskType},</if>
+            <if test="productionImpact != null">production_impact = #{productionImpact},</if>
+            <if test="entrustType != null">entrust_type = #{entrustType},</if>
+            <if test="maintenanceResource != null">maintenance_resource = #{maintenanceResource},</if>
+            <if test="maintenanceContent != null">maintenance_content = #{maintenanceContent},</if>
+            <if test="abnormalPhenomenon != null">abnormal_phenomenon = #{abnormalPhenomenon},</if>
+            <if test="handlingOpinion != null">handling_opinion = #{handlingOpinion},</if>
+            <if test="planId != null">plan_id = #{planId},</if>
+            <if test="planCode != null">plan_code = #{planCode},</if>
+            <if test="maintenanceCategory != null">maintenance_category = #{maintenanceCategory},</if>
+            <if test="maintenanceStartTime != null">maintenance_start_time = #{maintenanceStartTime},</if>
+            <if test="maintenanceEndTime != null">maintenance_end_time = #{maintenanceEndTime},</if>
+            <if test="standardId != null">standard_id = #{standardId},</if>
+            <if test="standardCode != null">standard_code = #{standardCode},</if>
+            <if test="partCode != null">part_code = #{partCode},</if>
+            <if test="partName != null">part_name = #{partName},</if>
+            <if test="itemName != null">item_name = #{itemName},</if>
+            <if test="profession != null">profession = #{profession},</if>
+            <if test="riskFactor != null">risk_factor = #{riskFactor},</if>
+            <if test="safetyMeasure != null">safety_measure = #{safetyMeasure},</if>
+            <if test="workCategory != null">work_category = #{workCategory},</if>
+            <if test="acceptanceLevel != null">acceptance_level = #{acceptanceLevel},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
+        DELETE FROM maintenance_ticket
+        WHERE status = #{allowedStatus}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateStatusByIds">
+        UPDATE maintenance_ticket
+        SET status = #{toStatus}, updated_at = #{updatedAt}
+        WHERE status = #{fromStatus}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.EquipmentPartMapper">
+    <sql id="selectSql">
+        SELECT id,
+               equipment_id AS equipmentId,
+               device_code,
+               device_name,
+               part_code,
+               part_name,
+               repair_team,
+               operate_team,
+               repair_strategy,
+               importance_level,
+               part_type,
+               maintainer,
+               creator_id,
+               created_at,
+               updated_at
+        FROM equipment_part
+    </sql>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.EquipmentPart">
+        <include refid="selectSql"/>
+        <where>
+            <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+            <if test="equipmentId != null">AND equipment_id = #{equipmentId}</if>
+            <if test="partCode != null and partCode != ''">AND part_code LIKE CONCAT('%', #{partCode}, '%')</if>
+            <if test="partName != null and partName != ''">AND part_name LIKE CONCAT('%', #{partName}, '%')</if>
+            <if test="maintainer != null and maintainer != ''">AND maintainer LIKE CONCAT('%', #{maintainer}, '%')</if>
+            <if test="partType != null and partType != ''">AND part_type = #{partType}</if>
+            <if test="repairStrategy != null and repairStrategy != ''">AND repair_strategy = #{repairStrategy}</if>
+            <if test="importanceLevel != null and importanceLevel != ''">AND importance_level = #{importanceLevel}</if>
+            <if test="repairTeam != null and repairTeam != ''">AND repair_team = #{repairTeam}</if>
+            <if test="operateTeam != null and operateTeam != ''">AND operate_team = #{operateTeam}</if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.EquipmentPart">
+        <include refid="selectSql"/>
+        <where>
+            <if test="equipmentId != null">AND equipment_id = #{equipmentId}</if>
+            <if test="deviceCode != null and deviceCode != ''">AND device_code = #{deviceCode}</if>
+            <if test="partCode != null and partCode != ''">AND part_code = #{partCode}</if>
+            <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+        </where>
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.EquipmentPart">
+        <include refid="selectSql"/>
+        WHERE id = #{id}
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.EquipmentPart" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO equipment_part
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            equipment_id, device_code, device_name, part_code, part_name,
+            <if test="repairTeam != null and repairTeam != ''">repair_team,</if>
+            <if test="operateTeam != null and operateTeam != ''">operate_team,</if>
+            <if test="repairStrategy != null and repairStrategy != ''">repair_strategy,</if>
+            <if test="importanceLevel != null and importanceLevel != ''">importance_level,</if>
+            <if test="partType != null and partType != ''">part_type,</if>
+            <if test="maintainer != null and maintainer != ''">maintainer,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{equipmentId}, #{deviceCode}, #{deviceName}, #{partCode}, #{partName},
+            <if test="repairTeam != null and repairTeam != ''">#{repairTeam},</if>
+            <if test="operateTeam != null and operateTeam != ''">#{operateTeam},</if>
+            <if test="repairStrategy != null and repairStrategy != ''">#{repairStrategy},</if>
+            <if test="importanceLevel != null and importanceLevel != ''">#{importanceLevel},</if>
+            <if test="partType != null and partType != ''">#{partType},</if>
+            <if test="maintainer != null and maintainer != ''">#{maintainer},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.EquipmentPart">
+        UPDATE equipment_part
+        <set>
+            <if test="equipmentId != null">equipment_id = #{equipmentId},</if>
+            <if test="deviceCode != null and deviceCode != ''">device_code = #{deviceCode},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="partCode != null and partCode != ''">part_code = #{partCode},</if>
+            <if test="partName != null and partName != ''">part_name = #{partName},</if>
+            <if test="repairTeam != null">repair_team = #{repairTeam},</if>
+            <if test="operateTeam != null">operate_team = #{operateTeam},</if>
+            <if test="repairStrategy != null">repair_strategy = #{repairStrategy},</if>
+            <if test="importanceLevel != null">importance_level = #{importanceLevel},</if>
+            <if test="partType != null">part_type = #{partType},</if>
+            <if test="maintainer != null">maintainer = #{maintainer},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">DELETE FROM equipment_part WHERE id = #{id}</delete>
+
+    <select id="getByEquipmentIdAndPartCodeAndCreatorId" resultType="com.hebei.systemdemo.domain.po.EquipmentPart">
+        <include refid="selectSql"/>
+        <where>
+            equipment_id = #{equipmentId}
+            AND part_code = #{partCode}
+            AND creator_id = #{creatorId}
+        </where>
+        LIMIT 1
+    </select>
+</mapper>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.DailyInspectionTableMapper">
+
+    <insert id="addDailyInspectionTable"
+            parameterType="com.hebei.systemdemo.domain.po.DailyInspectionTable"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO daily_inspection_table
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            table_code,
+            table_name,
+            production_line_id,
+            <if test="shiftMode != null">shift_mode,</if>
+            <if test="implementer != null">Implementer,</if>
+            <if test="status != null">status,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{tableCode},
+            #{tableName},
+            #{productionLineId},
+            <if test="shiftMode != null">#{shiftMode},</if>
+            <if test="implementer != null">#{implementer},</if>
+            <if test="status != null">#{status},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.DailyInspectionTable">
+        SELECT
+            dit.id,
+            dit.table_code,
+            dit.table_name,
+            dit.production_line_id,
+            dit.shift_mode,
+            dit.Implementer,
+            dit.status,
+            dit.creator_id,
+            dit.created_at AS createdAt,
+            dit.updated_at AS updatedAt
+        FROM daily_inspection_table dit
+        WHERE dit.id = #{id}
+        <if test="creatorId != null">
+            AND dit.creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <update id="updateDailyInspectionTable" parameterType="com.hebei.systemdemo.domain.po.DailyInspectionTable">
+        UPDATE daily_inspection_table
+        <set>
+            <if test="tableCode != null and tableCode != ''">table_code = #{tableCode},</if>
+            <if test="tableName != null and tableName != ''">table_name = #{tableName},</if>
+            <if test="productionLineId != null">production_line_id = #{productionLineId},</if>
+            <if test="shiftMode != null">shift_mode = #{shiftMode},</if>
+            <if test="implementer != null">Implementer = #{implementer},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.DailyInspectionTable">
+        SELECT
+            dit.id,
+            dit.table_code,
+            dit.table_name,
+            dit.production_line_id,
+            dit.shift_mode,
+            dit.Implementer,
+            dit.status,
+            dit.creator_id,
+            dit.created_at AS createdAt,
+            dit.updated_at AS updatedAt,
+            pl.line_name AS productionLineName,
+            su.real_name AS creatorName,
+            su.username AS creatorUsername
+        FROM daily_inspection_table dit
+        LEFT JOIN production_line pl ON dit.production_line_id = pl.id
+        LEFT JOIN sys_user su ON dit.creator_id = su.id
+        <where>
+            <if test="creatorId != null">
+                AND dit.creator_id = #{creatorId}
+            </if>
+            <if test="productionLineName != null and productionLineName != ''">
+                AND pl.line_name LIKE CONCAT('%', #{productionLineName}, '%')
+            </if>
+            <if test="tableName != null and tableName != ''">
+                AND dit.table_name LIKE CONCAT('%', #{tableName}, '%')
+            </if>
+            <if test="tableCode != null and tableCode != ''">
+                AND dit.table_code LIKE CONCAT('%', #{tableCode}, '%')
+            </if>
+            <if test="shiftMode != null and shiftMode != ''">
+                AND dit.shift_mode = #{shiftMode}
+            </if>
+        </where>
+        ORDER BY dit.id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.DailyInspectionTable">
+        SELECT
+            id,
+            table_code,
+            table_name,
+            production_line_id,
+            shift_mode,
+            Implementer,
+            status,
+            creator_id,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM daily_inspection_table
+        <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
+            <if test="tableCode != null and tableCode != ''">
+                AND table_code = #{tableCode}
+            </if>
+            <if test="productionLineId != null">
+                AND production_line_id = #{productionLineId}
+            </if>
+        </where>
+    </select>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM daily_inspection_table
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getMaxTableCodeByCreatorId" resultType="java.lang.String">
+        SELECT table_code
+        FROM daily_inspection_table
+        WHERE creator_id = #{creatorId}
+          AND table_code LIKE '%XJ%'
+        ORDER BY table_code DESC
+        LIMIT 1
+    </select>
+</mapper>

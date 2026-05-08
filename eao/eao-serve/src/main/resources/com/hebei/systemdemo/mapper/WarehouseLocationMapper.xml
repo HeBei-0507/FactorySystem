@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.WarehouseLocationMapper">
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.WarehouseLocation">
+        SELECT
+            wl.id,
+            wl.production_line_id AS productionLineId,
+            pl.line_name AS productionLineName,
+            wl.area_code AS areaCode,
+            wl.location_code AS locationCode,
+            wl.keeper_username AS keeperUsername,
+            wl.keeper_real_name AS keeperRealName,
+            wl.creator_id AS creatorId,
+            su.real_name AS creatorName,
+            su.username AS creatorUsername,
+            wl.created_at AS createdAt,
+            wl.updated_at AS updatedAt
+        FROM warehouse_location wl
+        LEFT JOIN production_line pl ON wl.production_line_id = pl.id
+        LEFT JOIN sys_user su ON wl.creator_id = su.id
+        <where>
+            <if test="creatorId != null">
+                AND wl.creator_id = #{creatorId}
+            </if>
+            <if test="productionLineId != null">
+                AND wl.production_line_id = #{productionLineId}
+            </if>
+            <if test="areaCode != null and areaCode != ''">
+                AND wl.area_code LIKE CONCAT('%', #{areaCode}, '%')
+            </if>
+            <if test="locationCode != null and locationCode != ''">
+                AND wl.location_code LIKE CONCAT('%', #{locationCode}, '%')
+            </if>
+            <if test="keeperUsername != null and keeperUsername != ''">
+                AND wl.keeper_username LIKE CONCAT('%', #{keeperUsername}, '%')
+            </if>
+            <if test="keeperRealName != null and keeperRealName != ''">
+                AND wl.keeper_real_name LIKE CONCAT('%', #{keeperRealName}, '%')
+            </if>
+        </where>
+        ORDER BY wl.id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.WarehouseLocation">
+        SELECT
+            wl.id,
+            wl.production_line_id AS productionLineId,
+            pl.line_name AS productionLineName,
+            wl.area_code AS areaCode,
+            wl.location_code AS locationCode,
+            wl.keeper_username AS keeperUsername,
+            wl.keeper_real_name AS keeperRealName,
+            wl.creator_id AS creatorId,
+            wl.created_at AS createdAt,
+            wl.updated_at AS updatedAt
+        FROM warehouse_location wl
+        LEFT JOIN production_line pl ON wl.production_line_id = pl.id
+        <where>
+            <if test="creatorId != null">
+                AND wl.creator_id = #{creatorId}
+            </if>
+            <if test="productionLineId != null">
+                AND wl.production_line_id = #{productionLineId}
+            </if>
+        </where>
+        ORDER BY wl.id DESC
+    </select>
+
+    <select id="listBySameCode" resultType="com.hebei.systemdemo.domain.po.WarehouseLocation">
+        SELECT id, production_line_id AS productionLineId, area_code AS areaCode, location_code AS locationCode
+        FROM warehouse_location
+        WHERE production_line_id = #{productionLineId}
+          AND area_code = #{areaCode}
+          AND location_code = #{locationCode}
+          <if test="creatorId != null">
+              AND creator_id = #{creatorId}
+          </if>
+          <if test="id != null">
+              AND id != #{id}
+          </if>
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.WarehouseLocation">
+        SELECT
+            id,
+            production_line_id AS productionLineId,
+            area_code AS areaCode,
+            location_code AS locationCode,
+            keeper_username AS keeperUsername,
+            keeper_real_name AS keeperRealName,
+            creator_id AS creatorId,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM warehouse_location
+        WHERE id = #{id}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.WarehouseLocation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO warehouse_location (
+            production_line_id,
+            area_code,
+            location_code,
+            keeper_username,
+            keeper_real_name,
+            creator_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{productionLineId},
+            #{areaCode},
+            #{locationCode},
+            #{keeperUsername},
+            #{keeperRealName},
+            #{creatorId},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.WarehouseLocation">
+        UPDATE warehouse_location
+        <set>
+            <if test="areaCode != null and areaCode != ''">area_code = #{areaCode},</if>
+            <if test="locationCode != null and locationCode != ''">location_code = #{locationCode},</if>
+            <if test="keeperUsername != null and keeperUsername != ''">keeper_username = #{keeperUsername},</if>
+            <if test="keeperRealName != null and keeperRealName != ''">keeper_real_name = #{keeperRealName},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM warehouse_location
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

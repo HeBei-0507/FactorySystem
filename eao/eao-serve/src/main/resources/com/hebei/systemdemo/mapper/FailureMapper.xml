@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.FailureMapper">
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.Failure" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO failure_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            failure_code,
+            <if test="devicePartCode != null">device_part_code,</if>
+            <if test="devicePartName != null">device_part_name,</if>
+            <if test="failureName != null">failure_name,</if>
+            <if test="failurePhenomenon != null">failure_phenomenon,</if>
+            <if test="failureDescription != null">failure_description,</if>
+            <if test="failureNoticeType != null">failure_notice_type,</if>
+            <if test="failureType != null">failure_type,</if>
+            <if test="failureStartTime != null">failure_start_time,</if>
+            <if test="status != null">status,</if>
+            <if test="creatorUsername != null">creator_username,</if>
+            <if test="creatorName != null">creator_name,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{failureCode},
+            <if test="devicePartCode != null">#{devicePartCode},</if>
+            <if test="devicePartName != null">#{devicePartName},</if>
+            <if test="failureName != null">#{failureName},</if>
+            <if test="failurePhenomenon != null">#{failurePhenomenon},</if>
+            <if test="failureDescription != null">#{failureDescription},</if>
+            <if test="failureNoticeType != null">#{failureNoticeType},</if>
+            <if test="failureType != null">#{failureType},</if>
+            <if test="failureStartTime != null">#{failureStartTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="creatorUsername != null">#{creatorUsername},</if>
+            <if test="creatorName != null">#{creatorName},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.Failure">
+        UPDATE failure_record
+        <set>
+            <if test="failureCode != null and failureCode != ''">failure_code = #{failureCode},</if>
+            <if test="devicePartCode != null">device_part_code = #{devicePartCode},</if>
+            <if test="devicePartName != null">device_part_name = #{devicePartName},</if>
+            <if test="failureName != null">failure_name = #{failureName},</if>
+            <if test="failurePhenomenon != null">failure_phenomenon = #{failurePhenomenon},</if>
+            <if test="failureDescription != null">failure_description = #{failureDescription},</if>
+            <if test="failureNoticeType != null">failure_notice_type = #{failureNoticeType},</if>
+            <if test="failureType != null">failure_type = #{failureType},</if>
+            <if test="failureStartTime != null">failure_start_time = #{failureStartTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.Failure">
+        SELECT
+            id,
+            failure_code AS failureCode,
+            device_part_code AS devicePartCode,
+            device_part_name AS devicePartName,
+            failure_name AS failureName,
+            failure_phenomenon AS failurePhenomenon,
+            failure_description AS failureDescription,
+            failure_notice_type AS failureNoticeType,
+            failure_type AS failureType,
+            failure_start_time AS failureStartTime,
+            status,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM failure_record
+        WHERE id = #{id}
+        <if test="creatorUsername != null and creatorUsername != ''">
+            AND creator_username = #{creatorUsername}
+        </if>
+    </select>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.Failure">
+        SELECT
+            id,
+            failure_code AS failureCode,
+            device_part_code AS devicePartCode,
+            device_part_name AS devicePartName,
+            failure_name AS failureName,
+            failure_phenomenon AS failurePhenomenon,
+            failure_description AS failureDescription,
+            failure_notice_type AS failureNoticeType,
+            failure_type AS failureType,
+            failure_start_time AS failureStartTime,
+            status,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM failure_record
+        <where>
+            <if test="creatorUsername != null and creatorUsername != ''">
+                AND creator_username = #{creatorUsername}
+            </if>
+            <if test="failureCode != null and failureCode != ''">
+                AND failure_code LIKE CONCAT('%', #{failureCode}, '%')
+            </if>
+            <if test="devicePartCode != null and devicePartCode != ''">
+                AND device_part_code LIKE CONCAT('%', #{devicePartCode}, '%')
+            </if>
+            <if test="failureName != null and failureName != ''">
+                AND failure_name LIKE CONCAT('%', #{failureName}, '%')
+            </if>
+            <if test="failureStartTime != null and failureStartTime != ''">
+                AND DATE(failure_start_time) = #{failureStartTime}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="failureType != null and failureType != ''">
+                AND failure_type = #{failureType}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM failure_record WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM failure_record
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateStatusByIds">
+        UPDATE failure_record
+        SET status = #{toStatus}, updated_at = #{updatedAt}
+        WHERE status = #{fromStatus}
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenanceTicketSafetyTagMapper">
+    <select id="listByTicketId" resultType="com.hebei.systemdemo.domain.po.MaintenanceTicketSafetyTag">
+        SELECT id, ticket_id AS ticketId, tag_nature AS tagNature, tag_location AS tagLocation,
+               tag_device_code AS tagDeviceCode, created_at AS createdAt, updated_at AS updatedAt
+        FROM maintenance_ticket_safety_tag
+        WHERE ticket_id = #{ticketId}
+        ORDER BY id DESC
+    </select>
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenanceTicketSafetyTag" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_ticket_safety_tag (
+            ticket_id, tag_nature, tag_location, tag_device_code, created_at, updated_at
+        ) VALUES (
+            #{ticketId}, #{tagNature}, #{tagLocation}, #{tagDeviceCode}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+    <delete id="deleteByTicketId">
+        DELETE FROM maintenance_ticket_safety_tag WHERE ticket_id = #{ticketId}
+    </delete>
+</mapper>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.SupplierManageMapper">
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.SupplierManage">
+        SELECT
+            id,
+            supplier_category AS supplierCategory,
+            supplier_code AS supplierCode,
+            supplier_name AS supplierName,
+            address,
+            contact_person AS contactPerson,
+            contact_id AS contactId,
+            contact_email AS contactEmail,
+            fax,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt
+        FROM supplier_manage
+        <where>
+            <if test="supplierCode != null and supplierCode != ''">
+                AND supplier_code = #{supplierCode}
+            </if>
+        </where>
+    </select>
+
+    <insert id="addSupplierManage" parameterType="com.hebei.systemdemo.domain.po.SupplierManage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO supplier_manage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="supplierCategory != null">supplier_category,</if>
+            supplier_code,
+            supplier_name,
+            <if test="address != null">address,</if>
+            <if test="contactPerson != null">contact_person,</if>
+            <if test="contactId != null">contact_id,</if>
+            <if test="contactEmail != null">contact_email,</if>
+            <if test="fax != null">fax,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="creatorUsername != null">creator_username,</if>
+            <if test="creatorName != null">creator_name,</if>
+            <if test="createdAt != null">created_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="supplierCategory != null">#{supplierCategory},</if>
+            #{supplierCode},
+            #{supplierName},
+            <if test="address != null">#{address},</if>
+            <if test="contactPerson != null">#{contactPerson},</if>
+            <if test="contactId != null">#{contactId},</if>
+            <if test="contactEmail != null">#{contactEmail},</if>
+            <if test="fax != null">#{fax},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="creatorUsername != null">#{creatorUsername},</if>
+            <if test="creatorName != null">#{creatorName},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+        </trim>
+    </insert>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.SupplierManage">
+        SELECT
+            id,
+            supplier_category AS supplierCategory,
+            supplier_code AS supplierCode,
+            supplier_name AS supplierName,
+            address,
+            contact_person AS contactPerson,
+            contact_id AS contactId,
+            contact_email AS contactEmail,
+            fax,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt
+        FROM supplier_manage
+        WHERE id = #{id}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <update id="updateSupplierManage" parameterType="com.hebei.systemdemo.domain.po.SupplierManage">
+        UPDATE supplier_manage
+        <set>
+            <if test="supplierCategory != null">supplier_category = #{supplierCategory},</if>
+            <if test="supplierCode != null and supplierCode != ''">supplier_code = #{supplierCode},</if>
+            <if test="supplierName != null and supplierName != ''">supplier_name = #{supplierName},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="contactPerson != null">contact_person = #{contactPerson},</if>
+            <if test="contactId != null">contact_id = #{contactId},</if>
+            <if test="contactEmail != null">contact_email = #{contactEmail},</if>
+            <if test="fax != null">fax = #{fax},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="creatorUsername != null">creator_username = #{creatorUsername},</if>
+            <if test="creatorName != null">creator_name = #{creatorName},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.SupplierManage">
+        SELECT
+            id,
+            supplier_category AS supplierCategory,
+            supplier_code AS supplierCode,
+            supplier_name AS supplierName,
+            address,
+            contact_person AS contactPerson,
+            contact_id AS contactId,
+            contact_email AS contactEmail,
+            fax,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt
+        FROM supplier_manage
+        <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
+            <if test="supplierCode != null and supplierCode != ''">
+                AND supplier_code LIKE CONCAT('%', #{supplierCode}, '%')
+            </if>
+            <if test="supplierName != null and supplierName != ''">
+                AND supplier_name LIKE CONCAT('%', #{supplierName}, '%')
+            </if>
+            <if test="supplierCategory != null and supplierCategory != ''">
+                AND supplier_category LIKE CONCAT('%', #{supplierCategory}, '%')
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM supplier_manage WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM supplier_manage
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getBySupplierCodeAndCreatorId" resultType="com.hebei.systemdemo.domain.po.SupplierManage">
+        SELECT
+            id,
+            supplier_category AS supplierCategory,
+            supplier_code AS supplierCode,
+            supplier_name AS supplierName,
+            address,
+            contact_person AS contactPerson,
+            contact_id AS contactId,
+            contact_email AS contactEmail,
+            fax,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt
+        FROM supplier_manage
+        WHERE supplier_code = #{supplierCode}
+          AND creator_id = #{creatorId}
+        LIMIT 1
+    </select>
+</mapper>

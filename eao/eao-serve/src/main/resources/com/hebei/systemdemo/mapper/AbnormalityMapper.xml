@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.AbnormalityMapper">
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.Abnormality" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO abnormality_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            abnormal_code,
+            <if test="deviceUnitCode != null">device_unit_code,</if>
+            <if test="source != null">source,</if>
+            <if test="abnormalLocation != null">abnormal_location,</if>
+            <if test="abnormalType != null">abnormal_type,</if>
+            <if test="safetyOutput != null">safety_output,</if>
+            <if test="reporter != null">reporter,</if>
+            <if test="abnormalDescription != null">abnormal_description,</if>
+            <if test="reportDate != null">report_date,</if>
+            <if test="status != null">status,</if>
+            <if test="handler != null">handler,</if>
+            <if test="handlerName != null">handler_name,</if>
+            <if test="handlerDate != null">handler_date,</if>
+            <if test="creatorUsername != null">creator_username,</if>
+            <if test="creatorName != null">creator_name,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{abnormalCode},
+            <if test="deviceUnitCode != null">#{deviceUnitCode},</if>
+            <if test="source != null">#{source},</if>
+            <if test="abnormalLocation != null">#{abnormalLocation},</if>
+            <if test="abnormalType != null">#{abnormalType},</if>
+            <if test="safetyOutput != null">#{safetyOutput},</if>
+            <if test="reporter != null">#{reporter},</if>
+            <if test="abnormalDescription != null">#{abnormalDescription},</if>
+            <if test="reportDate != null">#{reportDate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="handler != null">#{handler},</if>
+            <if test="handlerName != null">#{handlerName},</if>
+            <if test="handlerDate != null">#{handlerDate},</if>
+            <if test="creatorUsername != null">#{creatorUsername},</if>
+            <if test="creatorName != null">#{creatorName},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.Abnormality">
+        UPDATE abnormality_record
+        <set>
+            <if test="abnormalCode != null and abnormalCode != ''">abnormal_code = #{abnormalCode},</if>
+            <if test="deviceUnitCode != null">device_unit_code = #{deviceUnitCode},</if>
+            <if test="source != null">source = #{source},</if>
+            <if test="abnormalLocation != null">abnormal_location = #{abnormalLocation},</if>
+            <if test="abnormalType != null">abnormal_type = #{abnormalType},</if>
+            <if test="safetyOutput != null">safety_output = #{safetyOutput},</if>
+            <if test="reporter != null">reporter = #{reporter},</if>
+            <if test="abnormalDescription != null">abnormal_description = #{abnormalDescription},</if>
+            <if test="reportDate != null">report_date = #{reportDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="handler != null">handler = #{handler},</if>
+            <if test="handlerName != null">handler_name = #{handlerName},</if>
+            <if test="handlerDate != null">handler_date = #{handlerDate},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultType="com.hebei.systemdemo.domain.po.Abnormality">
+        SELECT
+            id,
+            abnormal_code AS abnormalCode,
+            device_unit_code AS deviceUnitCode,
+            source,
+            abnormal_location AS abnormalLocation,
+            abnormal_type AS abnormalType,
+            safety_output AS safetyOutput,
+            reporter,
+            abnormal_description AS abnormalDescription,
+            report_date AS reportDate,
+            status,
+            handler,
+            handler_name AS handlerName,
+            handler_date AS handlerDate,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM abnormality_record
+        WHERE id = #{id}
+        <if test="creatorUsername != null and creatorUsername != ''">
+            AND creator_username = #{creatorUsername}
+        </if>
+    </select>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.Abnormality">
+        SELECT
+            id,
+            abnormal_code AS abnormalCode,
+            device_unit_code AS deviceUnitCode,
+            source,
+            abnormal_location AS abnormalLocation,
+            abnormal_type AS abnormalType,
+            safety_output AS safetyOutput,
+            reporter,
+            abnormal_description AS abnormalDescription,
+            report_date AS reportDate,
+            status,
+            handler,
+            handler_name AS handlerName,
+            handler_date AS handlerDate,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM abnormality_record
+        <where>
+            <if test="creatorUsername != null and creatorUsername != ''">
+                AND creator_username = #{creatorUsername}
+            </if>
+            <if test="abnormalCode != null and abnormalCode != ''">
+                AND abnormal_code LIKE CONCAT('%', #{abnormalCode}, '%')
+            </if>
+            <if test="deviceUnitCode != null and deviceUnitCode != ''">
+                AND device_unit_code LIKE CONCAT('%', #{deviceUnitCode}, '%')
+            </if>
+            <if test="reporter != null and reporter != ''">
+                AND reporter LIKE CONCAT('%', #{reporter}, '%')
+            </if>
+            <if test="reportDate != null and reportDate != ''">
+                AND report_date = #{reportDate}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="abnormalType != null and abnormalType != ''">
+                AND abnormal_type = #{abnormalType}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM abnormality_record WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM abnormality_record
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateStatusByIds">
+        UPDATE abnormality_record
+        SET status = #{toStatus}, updated_at = #{updatedAt}
+        WHERE status = #{fromStatus}
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenancePlanMapper">
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.MaintenancePlan">
+        SELECT
+            id,
+            plan_code AS planCode,
+            production_line_code AS productionLineCode,
+            production_line_name AS productionLineName,
+            maintenance_category AS maintenanceCategory,
+            maintenance_start_time AS maintenanceStartTime,
+            maintenance_end_time AS maintenanceEndTime,
+            status,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM maintenance_plan
+        <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
+            <if test="planCode != null and planCode != ''">
+                AND plan_code LIKE CONCAT('%', #{planCode}, '%')
+            </if>
+            <if test="productionLineCode != null and productionLineCode != ''">
+                AND production_line_code LIKE CONCAT('%', #{productionLineCode}, '%')
+            </if>
+            <if test="maintenanceCategory != null and maintenanceCategory != ''">
+                AND maintenance_category = #{maintenanceCategory}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="excludeStatus != null and excludeStatus != ''">
+                AND status != #{excludeStatus}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.MaintenancePlan">
+        SELECT
+            id,
+            plan_code AS planCode,
+            production_line_code AS productionLineCode,
+            production_line_name AS productionLineName,
+            maintenance_category AS maintenanceCategory,
+            maintenance_start_time AS maintenanceStartTime,
+            maintenance_end_time AS maintenanceEndTime,
+            status,
+            creator_id AS creatorId,
+            creator_username AS creatorUsername,
+            creator_name AS creatorName,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM maintenance_plan
+        WHERE id = #{id}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenancePlan" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_plan (
+            plan_code, production_line_code, production_line_name, maintenance_category,
+            maintenance_start_time, maintenance_end_time, status,
+            creator_id, creator_username, creator_name, created_at, updated_at
+        ) VALUES (
+            #{planCode}, #{productionLineCode}, #{productionLineName}, #{maintenanceCategory},
+            #{maintenanceStartTime}, #{maintenanceEndTime}, #{status},
+            #{creatorId}, #{creatorUsername}, #{creatorName}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.MaintenancePlan">
+        UPDATE maintenance_plan
+        <set>
+            <if test="productionLineCode != null">production_line_code = #{productionLineCode},</if>
+            <if test="productionLineName != null">production_line_name = #{productionLineName},</if>
+            <if test="maintenanceCategory != null">maintenance_category = #{maintenanceCategory},</if>
+            <if test="maintenanceStartTime != null">maintenance_start_time = #{maintenanceStartTime},</if>
+            <if test="maintenanceEndTime != null">maintenance_end_time = #{maintenanceEndTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
+        DELETE FROM maintenance_plan
+        WHERE status = #{allowedStatus}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateStatusByIds">
+        UPDATE maintenance_plan
+        SET status = #{toStatus}, updated_at = #{updatedAt}
+        WHERE status = #{fromStatus}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

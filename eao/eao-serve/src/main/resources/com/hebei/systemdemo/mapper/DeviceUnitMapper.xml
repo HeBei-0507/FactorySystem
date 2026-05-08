@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.DeviceUnitMapper">
+
+    <select id="getDeviceUnitListByProductionLineId"
+            resultType="com.hebei.systemdemo.domain.po.DeviceUnit">
+
+        SELECT
+            du.id,
+            du.production_line_id,
+            du.unit_code,
+            du.unit_name,
+            du.creator_id,
+            du.created_at AS createAt,
+            du.updated_at AS updateAt
+        FROM device_unit du
+        WHERE du.production_line_id = #{productionLineId}
+        <if test="creatorId != null">
+            AND du.creator_id = #{creatorId}
+        </if>
+
+    </select>
+
+    <insert id="addDeviceUnit"
+            parameterType="com.hebei.systemdemo.domain.po.DeviceUnit"
+            useGeneratedKeys="true"
+            keyProperty="id">
+
+        INSERT INTO device_unit
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            production_line_id,
+            unit_code,
+            unit_name,
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createAt != null">created_at,</if>
+            <if test="updateAt != null">updated_at,</if>
+        </trim>
+
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{productionLineId},
+            #{unitCode},
+            #{unitName},
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createAt != null">#{createAt},</if>
+            <if test="updateAt != null">#{updateAt},</if>
+        </trim>
+
+    </insert>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.DeviceUnit">
+        SELECT
+            du.id,
+            du.production_line_id,
+            du.unit_code,
+            du.unit_name,
+            du.creator_id,
+            du.created_at AS createAt,
+            du.updated_at AS updateAt
+        FROM device_unit du
+        WHERE du.id = #{id}
+        <if test="creatorId != null">
+            AND du.creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <update id="updateDeviceUnit" parameterType="com.hebei.systemdemo.domain.po.DeviceUnit">
+        UPDATE device_unit
+        <set>
+            <if test="productionLineId != null">production_line_id = #{productionLineId},</if>
+            <if test="unitCode != null and unitCode != ''">unit_code = #{unitCode},</if>
+            <if test="unitName != null and unitName != ''">unit_name = #{unitName},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="updateAt != null">updated_at = #{updateAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="page"
+            resultType="com.hebei.systemdemo.domain.po.DeviceUnit">
+
+        SELECT
+            du.id,
+            du.production_line_id,
+            du.unit_code,
+            du.unit_name,
+            du.creator_id,
+            du.created_at AS createAt,
+            du.updated_at AS updateAt,
+            pl.line_name AS productionLineName,
+            su.real_name AS creatorName,
+            su.username AS creatorUsername
+        FROM device_unit du
+        LEFT JOIN production_line pl ON du.production_line_id = pl.id
+        LEFT JOIN sys_user su ON du.creator_id = su.id
+
+        <where>
+            <if test="creatorId != null">
+                AND du.creator_id = #{creatorId}
+            </if>
+            <if test="productionLineId != null">
+                AND du.production_line_id = #{productionLineId}
+            </if>
+
+            <if test="unitCode != null and unitCode != ''">
+                AND du.unit_code LIKE CONCAT('%', #{unitCode}, '%')
+            </if>
+
+            <if test="unitName != null and unitName != ''">
+                AND du.unit_name LIKE CONCAT('%', #{unitName}, '%')
+            </if>
+        </where>
+
+        ORDER BY du.id DESC
+
+    </select>
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.DeviceUnit">
+        SELECT
+            id,
+            production_line_id,
+            unit_code,
+            unit_name,
+            creator_id,
+            created_at AS createAt,
+            updated_at AS updateAt
+        FROM device_unit
+        <where>
+            <if test="productionLineId != null">
+                AND production_line_id = #{productionLineId}
+            </if>
+            <if test="unitCode != null and unitCode != ''">
+                AND unit_code = #{unitCode}
+            </if>
+        </where>
+    </select>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM device_unit
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getByUnitCodeAndCreatorId" resultType="com.hebei.systemdemo.domain.po.DeviceUnit">
+        SELECT
+            id,
+            production_line_id,
+            unit_code,
+            unit_name,
+            creator_id,
+            created_at AS createAt,
+            updated_at AS updateAt
+        FROM device_unit
+        WHERE unit_code = #{unitCode}
+          AND creator_id = #{creatorId}
+        LIMIT 1
+    </select>
+
+</mapper>

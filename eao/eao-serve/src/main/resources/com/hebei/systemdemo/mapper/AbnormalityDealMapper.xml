@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.AbnormalityDealMapper">
+
+    <select id="getByAbnormalityId" parameterType="java.lang.Long" resultType="com.hebei.systemdemo.domain.po.AbnormalityDeal">
+        SELECT
+            id,
+            abnormality_id AS abnormalityId,
+            processor,
+            process_method AS processMethod,
+            process_date AS processDate,
+            review_date AS reviewDate,
+            abnormal_occurred_date AS abnormalOccurredDate,
+            process_opinion AS processOpinion,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM abnormality_deal
+        WHERE abnormality_id = #{abnormalityId}
+        LIMIT 1
+    </select>
+
+    <delete id="deleteByAbnormalityId">
+        DELETE FROM abnormality_deal WHERE abnormality_id = #{abnormalityId}
+    </delete>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.AbnormalityDeal" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO abnormality_deal (
+            abnormality_id,
+            processor,
+            process_method,
+            process_date,
+            review_date,
+            abnormal_occurred_date,
+            process_opinion,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{abnormalityId},
+            #{processor},
+            #{processMethod},
+            #{processDate},
+            #{reviewDate},
+            #{abnormalOccurredDate},
+            #{processOpinion},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateByAbnormalityId" parameterType="com.hebei.systemdemo.domain.po.AbnormalityDeal">
+        UPDATE abnormality_deal
+        <set>
+            <if test="processor != null">processor = #{processor},</if>
+            <if test="processMethod != null">process_method = #{processMethod},</if>
+            <if test="processDate != null">process_date = #{processDate},</if>
+            <if test="reviewDate != null">review_date = #{reviewDate},</if>
+            <if test="abnormalOccurredDate != null">abnormal_occurred_date = #{abnormalOccurredDate},</if>
+            <if test="processOpinion != null">process_opinion = #{processOpinion},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE abnormality_id = #{abnormalityId}
+    </update>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.Abnormality">
+        SELECT
+            a.id,
+            a.abnormal_code AS abnormalCode,
+            a.device_unit_code AS deviceUnitCode,
+            NULL AS partName,
+            a.source,
+            a.abnormal_location AS abnormalLocation,
+            a.abnormal_type AS abnormalType,
+            a.safety_output AS safetyOutput,
+            a.reporter,
+            a.abnormal_description AS abnormalDescription,
+            a.report_date AS reportDate,
+            a.status,
+            a.creator_username AS creatorUsername,
+            a.creator_name AS creatorName,
+            a.created_at AS createdAt,
+            a.updated_at AS updatedAt,
+            d.processor AS handler,
+            d.process_method AS processMethod,
+            d.process_date AS handlerDate,
+            d.review_date AS reviewDate,
+            d.abnormal_occurred_date AS abnormalOccurredDate,
+            d.process_opinion AS processOpinion
+        FROM abnormality_record a
+        LEFT JOIN abnormality_deal d ON d.abnormality_id = a.id
+        <where>
+            <if test="creatorUsername != null and creatorUsername != ''">
+                AND a.creator_username = #{creatorUsername}
+            </if>
+            <if test="abnormalCode != null and abnormalCode != ''">
+                AND a.abnormal_code LIKE CONCAT('%', #{abnormalCode}, '%')
+            </if>
+            <if test="deviceUnitCode != null and deviceUnitCode != ''">
+                AND a.device_unit_code LIKE CONCAT('%', #{deviceUnitCode}, '%')
+            </if>
+            <if test="reporter != null and reporter != ''">
+                AND a.reporter LIKE CONCAT('%', #{reporter}, '%')
+            </if>
+            <if test="reportDate != null and reportDate != ''">
+                AND a.report_date = #{reportDate}
+            </if>
+            <if test="status != null and status != ''">
+                AND a.status = #{status}
+            </if>
+            <if test="abnormalType != null and abnormalType != ''">
+                AND a.abnormal_type = #{abnormalType}
+            </if>
+        </where>
+        ORDER BY a.id DESC
+    </select>
+
+    <select id="approvePage" resultType="com.hebei.systemdemo.domain.po.Abnormality">
+        SELECT
+            a.id,
+            a.abnormal_code AS abnormalCode,
+            a.device_unit_code AS deviceUnitCode,
+            NULL AS partName,
+            a.source,
+            a.abnormal_location AS abnormalLocation,
+            a.abnormal_type AS abnormalType,
+            a.safety_output AS safetyOutput,
+            a.reporter,
+            a.abnormal_description AS abnormalDescription,
+            a.report_date AS reportDate,
+            a.status,
+            a.creator_username AS creatorUsername,
+            a.creator_name AS creatorName,
+            a.created_at AS createdAt,
+            a.updated_at AS updatedAt,
+            d.processor AS handler,
+            d.process_method AS processMethod,
+            d.process_date AS handlerDate,
+            d.review_date AS reviewDate,
+            d.abnormal_occurred_date AS abnormalOccurredDate,
+            d.process_opinion AS processOpinion
+        FROM abnormality_record a
+        LEFT JOIN abnormality_deal d ON d.abnormality_id = a.id
+        <where>
+            AND a.status IN ('20', '30')
+            <if test="creatorUsername != null and creatorUsername != ''">
+                AND a.creator_username = #{creatorUsername}
+            </if>
+            <if test="abnormalCode != null and abnormalCode != ''">
+                AND a.abnormal_code LIKE CONCAT('%', #{abnormalCode}, '%')
+            </if>
+            <if test="deviceUnitCode != null and deviceUnitCode != ''">
+                AND a.device_unit_code LIKE CONCAT('%', #{deviceUnitCode}, '%')
+            </if>
+            <if test="reporter != null and reporter != ''">
+                AND a.reporter LIKE CONCAT('%', #{reporter}, '%')
+            </if>
+            <if test="reportDate != null and reportDate != ''">
+                AND a.report_date = #{reportDate}
+            </if>
+            <if test="status != null and status != ''">
+                AND a.status = #{status}
+            </if>
+            <if test="abnormalType != null and abnormalType != ''">
+                AND a.abnormal_type = #{abnormalType}
+            </if>
+        </where>
+        ORDER BY a.id DESC
+    </select>
+</mapper>

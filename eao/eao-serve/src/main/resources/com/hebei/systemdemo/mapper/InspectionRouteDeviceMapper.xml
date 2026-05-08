@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.InspectionRouteDeviceMapper">
+
+    <select id="getInspectionRouteDeviceListByRouteCode"
+            resultType="com.hebei.systemdemo.domain.po.InspectionRouteDevice">
+        SELECT
+            ird.id,
+            ird.route_code,
+            ird.route_name,
+            ird.equipment_code,
+            ird.equipment_name,
+            ird.sort,
+            ird.creator_id,
+            ird.created_at AS createdAt,
+            ird.updated_at AS updatedAt
+        FROM inspection_route_device ird
+        WHERE ird.route_code = #{routeCode}
+        <if test="creatorId != null">
+            AND ird.creator_id = #{creatorId}
+        </if>
+        ORDER BY ird.sort DESC, ird.id DESC
+    </select>
+
+    <insert id="addInspectionRouteDevice"
+            parameterType="com.hebei.systemdemo.domain.po.InspectionRouteDevice"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO inspection_route_device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            route_code,
+            route_name,
+            equipment_code,
+            equipment_name,
+            <if test="sort != null">sort,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{routeCode},
+            #{routeName},
+            #{equipmentCode},
+            #{equipmentName},
+            <if test="sort != null">#{sort},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.InspectionRouteDevice">
+        SELECT
+            ird.id,
+            ird.route_code,
+            ird.route_name,
+            ird.equipment_code,
+            ird.equipment_name,
+            ird.sort,
+            ird.creator_id,
+            ird.created_at AS createdAt,
+            ird.updated_at AS updatedAt
+        FROM inspection_route_device ird
+        WHERE ird.id = #{id}
+        <if test="creatorId != null">
+            AND ird.creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <update id="updateInspectionRouteDevice" parameterType="com.hebei.systemdemo.domain.po.InspectionRouteDevice">
+        UPDATE inspection_route_device
+        <set>
+            <if test="routeCode != null and routeCode != ''">route_code = #{routeCode},</if>
+            <if test="routeName != null and routeName != ''">route_name = #{routeName},</if>
+            <if test="equipmentCode != null and equipmentCode != ''">equipment_code = #{equipmentCode},</if>
+            <if test="equipmentName != null and equipmentName != ''">equipment_name = #{equipmentName},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.InspectionRouteDevice">
+        SELECT
+            ird.id,
+            ird.route_code,
+            ird.route_name,
+            ird.equipment_code,
+            ird.equipment_name,
+            ird.sort,
+            ird.creator_id,
+            ird.created_at AS createdAt,
+            ird.updated_at AS updatedAt,
+            su.real_name AS creatorName,
+            su.username AS creatorUsername
+        FROM inspection_route_device ird
+        LEFT JOIN sys_user su ON ird.creator_id = su.id
+        <where>
+            <if test="creatorId != null">
+                AND ird.creator_id = #{creatorId}
+            </if>
+            <if test="routeCode != null and routeCode != ''">
+                AND ird.route_code LIKE CONCAT('%', #{routeCode}, '%')
+            </if>
+            <if test="equipmentCode != null and equipmentCode != ''">
+                AND ird.equipment_code LIKE CONCAT('%', #{equipmentCode}, '%')
+            </if>
+            <if test="equipmentName != null and equipmentName != ''">
+                AND ird.equipment_name LIKE CONCAT('%', #{equipmentName}, '%')
+            </if>
+        </where>
+        ORDER BY ird.sort ASC, ird.id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.InspectionRouteDevice">
+        SELECT
+            id,
+            route_code,
+            route_name,
+            equipment_code,
+            equipment_name,
+            sort,
+            creator_id,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM inspection_route_device
+        <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
+            <if test="routeCode != null and routeCode != ''">
+                AND route_code = #{routeCode}
+            </if>
+            <if test="equipmentCode != null and equipmentCode != ''">
+                AND equipment_code = #{equipmentCode}
+            </if>
+        </where>
+    </select>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM inspection_route_device
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

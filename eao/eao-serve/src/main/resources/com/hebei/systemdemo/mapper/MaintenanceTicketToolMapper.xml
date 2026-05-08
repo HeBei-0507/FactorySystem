@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenanceTicketToolMapper">
+    <select id="listByTicketId" resultType="com.hebei.systemdemo.domain.po.MaintenanceTicketTool">
+        SELECT id, ticket_id AS ticketId, material_code_id AS materialCodeId, inbound_request_id AS inboundRequestId,
+               material_code AS materialCode, material_name AS materialName, material_sub_category AS materialSubCategory,
+               model_specification AS modelSpecification, quantity, quantity_unit AS quantityUnit,
+               created_at AS createdAt, updated_at AS updatedAt
+        FROM maintenance_ticket_tool
+        WHERE ticket_id = #{ticketId}
+        ORDER BY id DESC
+    </select>
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenanceTicketTool" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_ticket_tool (
+            ticket_id, material_code_id, inbound_request_id, material_code, material_name,
+            material_sub_category, model_specification, quantity, quantity_unit, created_at, updated_at
+        ) VALUES (
+            #{ticketId}, #{materialCodeId}, #{inboundRequestId}, #{materialCode}, #{materialName},
+            #{materialSubCategory}, #{modelSpecification}, #{quantity}, #{quantityUnit}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+    <delete id="deleteByTicketId">
+        DELETE FROM maintenance_ticket_tool WHERE ticket_id = #{ticketId}
+    </delete>
+</mapper>

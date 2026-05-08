@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.MaintenanceStandardMapper">
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.MaintenanceStandard">
+        SELECT
+            ms.id,
+            ms.standard_code AS standardCode,
+            ms.part_code AS partCode,
+            ms.part_name AS partName,
+            ms.item_name AS itemName,
+            ms.risk_factor AS riskFactor,
+            ms.safety_measure AS safetyMeasure,
+            ms.work_category AS workCategory,
+            ms.work_content AS workContent,
+            ms.acceptance_level AS acceptanceLevel,
+            ms.maintenance_category AS maintenanceCategory,
+            ms.profession,
+            ms.cycle_value AS cycleValue,
+            ms.cycle_unit AS cycleUnit,
+            ms.last_completion_date AS lastCompletionDate,
+            ms.next_schedule_date AS nextScheduleDate,
+            ms.maintainer_id AS maintainerId,
+            ms.maintainer_name AS maintainerName,
+            ms.maintainer_username AS maintainerUsername,
+            ms.maintenance_start_time AS maintenanceStartTime,
+            ms.maintenance_end_time AS maintenanceEndTime,
+            ms.created_at AS createdAt,
+            ms.updated_at AS updatedAt
+        FROM maintenance_standard ms
+        <where>
+            <if test="maintainerId != null">
+                AND ms.maintainer_id = #{maintainerId}
+            </if>
+            <if test="standardCode != null and standardCode != ''">
+                AND ms.standard_code LIKE CONCAT('%', #{standardCode}, '%')
+            </if>
+            <if test="partCode != null and partCode != ''">
+                AND ms.part_code LIKE CONCAT('%', #{partCode}, '%')
+            </if>
+            <if test="partCodes != null and partCodes.size() > 0">
+                AND ms.part_code IN
+                <foreach collection="partCodes" item="code" open="(" separator="," close=")">
+                    #{code}
+                </foreach>
+            </if>
+            <if test="partName != null and partName != ''">
+                AND ms.part_name LIKE CONCAT('%', #{partName}, '%')
+            </if>
+            <if test="itemName != null and itemName != ''">
+                AND ms.item_name LIKE CONCAT('%', #{itemName}, '%')
+            </if>
+            <if test="profession != null and profession != ''">
+                AND ms.profession = #{profession}
+            </if>
+            <if test="maintenanceCategory != null and maintenanceCategory != ''">
+                AND ms.maintenance_category = #{maintenanceCategory}
+            </if>
+            <if test="maintenanceStartTime != null and maintenanceStartTime != ''">
+                AND ms.maintenance_start_time &gt;= #{maintenanceStartTime}
+            </if>
+            <if test="maintenanceEndTime != null and maintenanceEndTime != ''">
+                AND ms.maintenance_end_time &lt;= #{maintenanceEndTime}
+            </if>
+            <if test="workCategory != null and workCategory != ''">
+                AND ms.work_category = #{workCategory}
+            </if>
+            <if test="workContent != null and workContent != ''">
+                AND ms.work_content LIKE CONCAT('%', #{workContent}, '%')
+            </if>
+        </where>
+        ORDER BY ms.id DESC
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.MaintenanceStandard">
+        SELECT
+            id,
+            standard_code AS standardCode,
+            part_code AS partCode,
+            part_name AS partName,
+            item_name AS itemName,
+            risk_factor AS riskFactor,
+            safety_measure AS safetyMeasure,
+            work_category AS workCategory,
+            work_content AS workContent,
+            acceptance_level AS acceptanceLevel,
+            maintenance_category AS maintenanceCategory,
+            profession,
+            cycle_value AS cycleValue,
+            cycle_unit AS cycleUnit,
+            last_completion_date AS lastCompletionDate,
+            next_schedule_date AS nextScheduleDate,
+            maintainer_id AS maintainerId,
+            maintainer_name AS maintainerName,
+            maintainer_username AS maintainerUsername,
+            maintenance_start_time AS maintenanceStartTime,
+            maintenance_end_time AS maintenanceEndTime,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM maintenance_standard
+        WHERE id = #{id}
+        <if test="maintainerId != null">
+            AND maintainer_id = #{maintainerId}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.MaintenanceStandard" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintenance_standard (
+            standard_code, part_code, part_name, item_name, risk_factor, safety_measure,
+            work_category, work_content, acceptance_level, maintenance_category, profession,
+            cycle_value, cycle_unit, last_completion_date, next_schedule_date,
+            maintainer_id, maintainer_name, maintainer_username,
+            maintenance_start_time, maintenance_end_time, created_at, updated_at
+        ) VALUES (
+            #{standardCode}, #{partCode}, #{partName}, #{itemName}, #{riskFactor}, #{safetyMeasure},
+            #{workCategory}, #{workContent}, #{acceptanceLevel}, #{maintenanceCategory}, #{profession},
+            #{cycleValue}, #{cycleUnit}, #{lastCompletionDate}, #{nextScheduleDate},
+            #{maintainerId}, #{maintainerName}, #{maintainerUsername},
+            #{maintenanceStartTime}, #{maintenanceEndTime}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.MaintenanceStandard">
+        UPDATE maintenance_standard
+        <set>
+            <if test="partCode != null">part_code = #{partCode},</if>
+            <if test="partName != null">part_name = #{partName},</if>
+            <if test="itemName != null">item_name = #{itemName},</if>
+            <if test="riskFactor != null">risk_factor = #{riskFactor},</if>
+            <if test="safetyMeasure != null">safety_measure = #{safetyMeasure},</if>
+            <if test="workCategory != null">work_category = #{workCategory},</if>
+            <if test="workContent != null">work_content = #{workContent},</if>
+            <if test="acceptanceLevel != null">acceptance_level = #{acceptanceLevel},</if>
+            <if test="maintenanceCategory != null">maintenance_category = #{maintenanceCategory},</if>
+            <if test="profession != null">profession = #{profession},</if>
+            <if test="cycleValue != null">cycle_value = #{cycleValue},</if>
+            <if test="cycleUnit != null">cycle_unit = #{cycleUnit},</if>
+            <if test="lastCompletionDate != null">last_completion_date = #{lastCompletionDate},</if>
+            <if test="nextScheduleDate != null">next_schedule_date = #{nextScheduleDate},</if>
+            <if test="maintainerId != null">maintainer_id = #{maintainerId},</if>
+            <if test="maintainerName != null">maintainer_name = #{maintainerName},</if>
+            <if test="maintainerUsername != null">maintainer_username = #{maintainerUsername},</if>
+            <if test="maintenanceStartTime != null">maintenance_start_time = #{maintenanceStartTime},</if>
+            <if test="maintenanceEndTime != null">maintenance_end_time = #{maintenanceEndTime},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+        <if test="maintainerId != null">
+            AND maintainer_id = #{maintainerId}
+        </if>
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM maintenance_standard
+        WHERE id = #{id}
+        <if test="maintainerId != null">
+            AND maintainer_id = #{maintainerId}
+        </if>
+    </delete>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.ProductionLineMapper">
+
+    <resultMap id="ProductionLineResultMap" type="com.hebei.systemdemo.domain.po.ProductionLine">
+        <id property="id" column="id"/>
+
+        <result property="lineCode" column="line_code"/>
+        <result property="lineName" column="line_name"/>
+        <result property="description" column="description"/>
+        <result property="creatorId" column="creator_id"/>
+
+        <result property="createAt" column="created_at"/>
+        <result property="updateAt" column="updated_at"/>
+    </resultMap>
+
+
+    <select id="list" resultMap="ProductionLineResultMap">
+        select * from device_manage_system.production_line;
+    </select>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="ProductionLineResultMap">
+        SELECT
+            id,
+            line_code,
+            line_name,
+            description,
+            creator_id,
+            created_at,
+            updated_at
+        FROM device_manage_system.production_line
+        WHERE id = #{id}
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.ProductionLine" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO device_manage_system.production_line
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            line_code,
+            line_name,
+            <if test="description != null and description != ''">description,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createAt != null">created_at,</if>
+            <if test="updateAt != null">updated_at,</if>
+        </trim>
+
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{lineCode},
+            #{lineName},
+            <if test="description != null and description != ''">#{description},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createAt != null">#{createAt},</if>
+            <if test="updateAt != null">#{updateAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.ProductionLine">
+        UPDATE device_manage_system.production_line
+        <set>
+            <if test="lineCode != null and lineCode != ''">line_code = #{lineCode},</if>
+            <if test="lineName != null and lineName != ''">line_name = #{lineName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="updateAt != null">updated_at = #{updateAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM device_manage_system.production_line
+        WHERE id = #{id}
+    </delete>
+</mapper>

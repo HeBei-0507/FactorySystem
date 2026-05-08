@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.LubricationStandardMapper">
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.LubricationStandard">
+        SELECT id, part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
+               feed_point, oil_models, oil_volume, next_check_time, creator_id, created_at, updated_at
+        FROM lubrication_standard
+        <where>
+            <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+            <if test="standardCode != null and standardCode != ''">AND standard_code LIKE CONCAT('%', #{standardCode}, '%')</if>
+            <if test="partCode != null and partCode != ''">AND part_code LIKE CONCAT('%', #{partCode}, '%')</if>
+            <if test="partName != null and partName != ''">AND part_name LIKE CONCAT('%', #{partName}, '%')</if>
+            <if test="feedPoint != null and feedPoint != ''">AND feed_point LIKE CONCAT('%', #{feedPoint}, '%')</if>
+            <if test="oilModels != null and oilModels != ''">AND oil_models LIKE CONCAT('%', #{oilModels}, '%')</if>
+            <if test="profession != null and profession != ''">AND profession = #{profession}</if>
+            <if test="oilFeedType != null and oilFeedType != ''">AND oil_feed_type = #{oilFeedType}</if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="list" resultType="com.hebei.systemdemo.domain.po.LubricationStandard">
+        SELECT id, part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
+               feed_point, oil_models, oil_volume, next_check_time, creator_id, created_at, updated_at
+        FROM lubrication_standard
+        <where>
+            <if test="partCode != null and partCode != ''">AND part_code = #{partCode}</if>
+            <if test="standardCode != null and standardCode != ''">AND standard_code = #{standardCode}</if>
+        </where>
+    </select>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.LubricationStandard">
+        SELECT id, part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
+               feed_point, oil_models, oil_volume, next_check_time, creator_id, created_at, updated_at
+        FROM lubrication_standard
+        WHERE id = #{id}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
+    </select>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.LubricationStandard" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO lubrication_standard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
+            feed_point, oil_models, oil_volume, next_check_time,
+            <if test="creatorId != null">creator_id,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{partCode}, #{partName}, #{standardCode}, #{standardName}, #{method}, #{profession}, #{oilFeedType},
+            #{feedPoint}, #{oilModels}, #{oilVolume}, #{nextCheckTime},
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.LubricationStandard">
+        UPDATE lubrication_standard
+        <set>
+            <if test="partCode != null and partCode != ''">part_code = #{partCode},</if>
+            <if test="partName != null">part_name = #{partName},</if>
+            <if test="standardCode != null and standardCode != ''">standard_code = #{standardCode},</if>
+            <if test="standardName != null and standardName != ''">standard_name = #{standardName},</if>
+            <if test="method != null and method != ''">method = #{method},</if>
+            <if test="profession != null and profession != ''">profession = #{profession},</if>
+            <if test="oilFeedType != null and oilFeedType != ''">oil_feed_type = #{oilFeedType},</if>
+            <if test="feedPoint != null and feedPoint != ''">feed_point = #{feedPoint},</if>
+            <if test="oilModels != null and oilModels != ''">oil_models = #{oilModels},</if>
+            <if test="oilVolume != null and oilVolume != ''">oil_volume = #{oilVolume},</if>
+            <if test="nextCheckTime != null">next_check_time = #{nextCheckTime},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">DELETE FROM lubrication_standard WHERE id = #{id}</delete>
+</mapper>
