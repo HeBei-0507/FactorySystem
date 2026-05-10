@@ -389,6 +389,22 @@ const activeDevice = computed(
   () =>
     activeUnit.value?.devices?.find((v) => String(v.id) === String(activeDeviceId.value)) || null
 )
+const breadcrumbScopeLabel = computed(() => {
+  const dev = activeDevice.value
+  const unit = activeUnit.value
+  return (dev && dev.equipmentName) || (unit && unit.unitName) || '未选择设备'
+})
+const currentScopeCodeLabel = computed(() => {
+  const dev = activeDevice.value
+  const unit = activeUnit.value
+  return (dev && dev.equipmentCode) || (unit && unit.unitCode) || '--'
+})
+const currentScopeNameLabel = computed(() => {
+  const dev = activeDevice.value
+  const unit = activeUnit.value
+  return (dev && dev.equipmentName) || (unit && unit.unitName) || '--'
+})
+const inspectionPageSizes = [10, 20, 50, 100]
 const mapLine = (i) => ({ id: i.id, name: i.lineName, units: [] })
 const mapUnit = (i) => ({ id: i.id, unitCode: i.unitCode, unitName: i.unitName, devices: [] })
 const mapDeviceBrief = (i) => ({
@@ -621,6 +637,11 @@ function handleInspectionSearch() {
   inspectionPagination.currentPage = 1
   loadInspectionPage()
 }
+function handleInspectionPageSizeChange(size) {
+  inspectionPagination.pageSize = size
+  inspectionPagination.currentPage = 1
+  loadInspectionPage()
+}
 function handlePartChangeByCode(code) {
   selectedPartCode.value = code || ''
   if (!selectedPartCode.value) {
@@ -781,7 +802,7 @@ loadIDAddressOptions()
 <template>
   <div class="standard-page">
     <div class="page-breadcrumb">
-      {{ pageTitle }} &gt; {{ activeDevice?.equipmentName || activeUnit?.unitName || '未选择设备' }}
+      {{ pageTitle }} &gt; {{ breadcrumbScopeLabel }}
     </div>
     <div class="page-content">
       <aside class="tree-panel">
@@ -825,8 +846,7 @@ loadIDAddressOptions()
       <section class="table-panel">
         <div class="toolbar-row">
           <div class="selected-device">
-            当前范围：{{ activeDevice?.equipmentCode || activeUnit?.unitCode || '--' }}
-            {{ activeDevice?.equipmentName || activeUnit?.unitName || '--' }}
+            当前范围：{{ currentScopeCodeLabel }} {{ currentScopeNameLabel }}
           </div>
         </div>
 
@@ -975,10 +995,12 @@ loadIDAddressOptions()
           <el-pagination
             small
             background
-            layout="prev, pager, next"
+            layout="total, sizes, prev, pager, next"
+            :page-sizes="inspectionPageSizes"
             :current-page="inspectionPagination.currentPage"
             :page-size="inspectionPagination.pageSize"
             :total="inspectionPagination.total"
+            @size-change="handleInspectionPageSizeChange"
             @current-change="
               (p) => {
                 inspectionPagination.currentPage = p
