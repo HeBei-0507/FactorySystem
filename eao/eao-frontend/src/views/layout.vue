@@ -7,11 +7,14 @@ import {
   Bell,
   CollectionTag,
   Connection,
+  Document,
   Guide,
   Finished,
   Management,
   Memo,
   OfficeBuilding,
+  Opportunity,
+  Phone,
   Promotion,
   Tickets,
   User,
@@ -205,23 +208,47 @@ function handleMenuClick(item) {
 function hasMenuChildren(item) {
   return !!(item && Array.isArray(item.children) && item.children.length)
 }
+
+const calendarDate = ref(new Date())
+const calendarTitle = computed(() => {
+  const d = calendarDate.value
+  return `${d.getFullYear()}年${d.getMonth() + 1}月`
+})
+function shiftCalendarYear(delta) {
+  const d = new Date(calendarDate.value)
+  d.setFullYear(d.getFullYear() + delta)
+  calendarDate.value = d
+}
+function shiftCalendarMonth(delta) {
+  const d = new Date(calendarDate.value)
+  d.setMonth(d.getMonth() + delta)
+  calendarDate.value = d
+}
 </script>
 
 <template>
   <el-container class="page">
     <el-header class="topbar">
       <div class="brand">
-        <div class="brand-badge">高仁</div>
-        <div class="brand-text">
-          <div class="brand-line1">天津高仁科技有限公司</div>
-          <div class="brand-line2">智能点检系统</div>
+        <div class="brand-mark" aria-hidden="true">
+          <span class="brand-mark-text">高仁</span>
+        </div>
+        <div class="brand-copy">
+          <h1 class="brand-product">智能点检系统</h1>
+          <p class="brand-company">天津高仁科技有限公司</p>
         </div>
       </div>
       <div class="topbar-right">
-        <span class="link-like">操作手册</span>
+        <button type="button" class="topbar-pill topbar-pill--ghost">
+          <el-icon class="topbar-pill-icon"><Document /></el-icon>
+          <span>操作手册</span>
+        </button>
+        <span class="topbar-divider" aria-hidden="true" />
         <el-dropdown trigger="click" @command="handleUserCommand">
-          <span class="user-block">
-            <el-icon class="user-icon"><User /></el-icon>
+          <span class="topbar-pill user-block">
+            <span class="user-avatar" aria-hidden="true">
+              <el-icon><User /></el-icon>
+            </span>
             <span class="user-name">{{ displayName }}</span>
             <el-icon class="user-caret"><ArrowDown /></el-icon>
           </span>
@@ -231,7 +258,11 @@ function hasMenuChildren(item) {
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <span class="user-sub">{{ subLine }}</span>
+        <span class="topbar-divider" aria-hidden="true" />
+        <div class="topbar-contact" :title="subLine">
+          <el-icon class="topbar-pill-icon"><Phone /></el-icon>
+          <span class="user-sub">{{ subLine }}</span>
+        </div>
       </div>
     </el-header>
 
@@ -306,15 +337,15 @@ function hasMenuChildren(item) {
           <el-card shadow="never" class="panel calendar-panel">
             <div class="calendar-wrap">
               <div class="calendar-head">
-                <el-button text circle><span>«</span></el-button>
-                <el-button text circle><span>‹</span></el-button>
-                <span class="calendar-title">2026年5月</span>
+                <el-button text circle @click="shiftCalendarYear(-1)"><span>«</span></el-button>
+                <el-button text circle @click="shiftCalendarMonth(-1)"><span>‹</span></el-button>
+                <span class="calendar-title">{{ calendarTitle }}</span>
                 <div class="calendar-actions">
-                  <el-button text circle><span>›</span></el-button>
-                  <el-button text circle><span>»</span></el-button>
+                  <el-button text circle @click="shiftCalendarMonth(1)"><span>›</span></el-button>
+                  <el-button text circle @click="shiftCalendarYear(1)"><span>»</span></el-button>
                 </div>
               </div>
-              <el-calendar />
+              <el-calendar v-model="calendarDate" />
               <div class="calendar-empty">
                 <el-icon><Finished /></el-icon>
                 <span>暂无数据</span>
@@ -390,77 +421,151 @@ function hasMenuChildren(item) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 56px;
-  padding: 0 14px;
-  background: linear-gradient(90deg, #1c55c8, #2b61ca);
+  height: 64px;
+  padding: 0 22px 0 20px;
+  background: linear-gradient(105deg, #153d9e 0%, #1e5fd4 42%, #2563d8 100%);
   color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 4px 18px rgba(15, 45, 120, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  min-width: 0;
 }
-.brand-badge {
+.brand-mark {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
-  width: 38px;
-  height: 28px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.18);
-  font-size: 14px;
-  font-weight: 700;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
-.brand-line1 {
+.brand-mark-text {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  margin-left: 2px;
+  padding-left: 14px;
+  border-left: 3px solid rgba(255, 255, 255, 0.45);
+}
+.brand-product {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.brand-company {
+  margin: 0;
   font-size: 12px;
-}
-.brand-line2 {
-  font-size: 18px;
-  font-weight: 700;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.3;
 }
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: 12px;
+  gap: 0;
+  font-size: 13px;
+  flex-shrink: 0;
 }
-.link-like {
+.topbar-divider {
+  width: 1px;
+  height: 22px;
+  margin: 0 14px;
+  background: rgba(255, 255, 255, 0.28);
+}
+.topbar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font: inherit;
   cursor: pointer;
+  outline: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.topbar-pill--ghost:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.topbar-pill-icon {
+  font-size: 16px;
   opacity: 0.95;
 }
 .user-block {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 4px 2px;
-  outline: none;
-  max-width: 200px;
+  max-width: 220px;
 }
 .user-block:hover {
-  opacity: 0.95;
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
 }
-.user-icon {
-  font-size: 16px;
+.user-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 15px;
   flex-shrink: 0;
+}
+.topbar-right :deep(.el-dropdown),
+.topbar-right :deep(.el-dropdown__caret-button),
+.topbar-right :deep(.el-tooltip__trigger) {
+  color: #fff;
+  outline: none;
 }
 .user-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .user-caret {
   font-size: 12px;
   opacity: 0.85;
+  flex-shrink: 0;
+}
+.topbar-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  padding: 6px 0 6px 2px;
+  color: rgba(255, 255, 255, 0.92);
 }
 .user-sub {
-  opacity: 0.9;
-  max-width: 200px;
+  opacity: 0.95;
+  max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 12px;
 }
 .main-layout {
-  height: calc(100vh - 56px);
+  height: calc(100vh - 64px);
 }
 .sidebar {
   background: #fff;
@@ -639,6 +744,17 @@ function hasMenuChildren(item) {
 .calendar-panel :deep(.el-calendar-table .el-calendar-day) {
   height: 54px;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.calendar-panel :deep(.el-calendar-table .el-calendar-day > span) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 .calendar-empty {
   display: flex;

@@ -4,8 +4,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Document } from '@element-plus/icons-vue'
 import { getProductionlineList } from '@/api/prodectionLine'
 import { getDeviceUtilList } from '@/api/deviceUnit'
-import { getEquipmentListByDeviceUnitCode } from '@/api/equipment'
-import { getEquipmentPartListByDeviceCode } from '@/api/equipmentPart'
+import { getEquipmentListByDeviceUnitId } from '@/api/equipment'
+import { getEquipmentPartListByEquipmentId } from '@/api/equipmentPart'
 import {
   addMaintenanceStandard,
   deleteMaintenanceStandard,
@@ -179,7 +179,7 @@ async function selectUnit(l, u) {
   expU.value = u.id
   expD.value = ''
   if (!u.loaded) {
-    const r = await getEquipmentListByDeviceUnitCode(u.unitCode)
+    const r = await getEquipmentListByDeviceUnitId(u.id)
     u.devices = extractRecordsArray(r?.data).map(mapD)
     u.loaded = true
   }
@@ -196,7 +196,7 @@ async function selectDev(l, u, d) {
   }
   expD.value = d.id
   if (!d.loaded) {
-    const r = await getEquipmentPartListByDeviceCode(d.equipmentCode)
+    const r = await getEquipmentPartListByEquipmentId(d.id)
     d.parts = extractRecordsArray(r?.data).map(mapP)
     d.loaded = true
   }
