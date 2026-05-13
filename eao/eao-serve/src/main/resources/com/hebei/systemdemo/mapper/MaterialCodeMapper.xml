@@ -160,7 +160,11 @@
     </select>
 
     <delete id="deleteById">
-        DELETE FROM material_code WHERE id = #{id}
+        DELETE FROM material_code
+        WHERE id = #{id}
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
     </delete>
 
     <delete id="batchDeleteByIds">
@@ -169,5 +173,8 @@
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
+        <if test="creatorId != null">
+            AND creator_id = #{creatorId}
+        </if>
     </delete>
 </mapper>

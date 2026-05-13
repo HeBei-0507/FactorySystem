@@ -5,25 +5,34 @@
 
 <mapper namespace="com.hebei.systemdemo.mapper.AbnormalityDealMapper">
 
-    <select id="getByAbnormalityId" parameterType="java.lang.Long" resultType="com.hebei.systemdemo.domain.po.AbnormalityDeal">
+    <select id="getByAbnormalityId" resultType="com.hebei.systemdemo.domain.po.AbnormalityDeal">
         SELECT
-            id,
-            abnormality_id AS abnormalityId,
-            processor,
-            process_method AS processMethod,
-            process_date AS processDate,
-            review_date AS reviewDate,
-            abnormal_occurred_date AS abnormalOccurredDate,
-            process_opinion AS processOpinion,
-            created_at AS createdAt,
-            updated_at AS updatedAt
-        FROM abnormality_deal
-        WHERE abnormality_id = #{abnormalityId}
+            d.id,
+            d.abnormality_id AS abnormalityId,
+            d.processor,
+            d.process_method AS processMethod,
+            d.process_date AS processDate,
+            d.review_date AS reviewDate,
+            d.abnormal_occurred_date AS abnormalOccurredDate,
+            d.process_opinion AS processOpinion,
+            d.created_at AS createdAt,
+            d.updated_at AS updatedAt
+        FROM abnormality_deal d
+        INNER JOIN abnormality_record a ON a.id = d.abnormality_id
+        WHERE d.abnormality_id = #{abnormalityId}
+        <if test="creatorUsername != null and creatorUsername != ''">
+            AND a.creator_username = #{creatorUsername}
+        </if>
         LIMIT 1
     </select>
 
     <delete id="deleteByAbnormalityId">
-        DELETE FROM abnormality_deal WHERE abnormality_id = #{abnormalityId}
+        DELETE d FROM abnormality_deal d
+        INNER JOIN abnormality_record a ON a.id = d.abnormality_id
+        WHERE d.abnormality_id = #{abnormalityId}
+        <if test="creatorUsername != null and creatorUsername != ''">
+            AND a.creator_username = #{creatorUsername}
+        </if>
     </delete>
 
     <insert id="add" parameterType="com.hebei.systemdemo.domain.po.AbnormalityDeal" useGeneratedKeys="true" keyProperty="id">

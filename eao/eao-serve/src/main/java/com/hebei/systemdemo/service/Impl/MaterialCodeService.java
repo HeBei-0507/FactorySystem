@@ -36,7 +36,7 @@ public class MaterialCodeService implements IMaterialCodeService {
         materialCode.setMaterialProperty(trimToNull(materialCode.getMaterialProperty()));
         materialCode.setStatus(trimToNull(materialCode.getStatus()));
 
-        if (!materialCodeMapper.list(new MaterialCode().setMaterialCode(materialCode.getMaterialCode())).isEmpty()) {
+        if (!materialCodeMapper.list(new MaterialCode().setMaterialCode(materialCode.getMaterialCode()).setCreatorId(currentUserId())).isEmpty()) {
             return Result.fail("物料代码已存在");
         }
 
@@ -74,7 +74,7 @@ public class MaterialCodeService implements IMaterialCodeService {
         materialCode.setMaterialProperty(trimToNull(materialCode.getMaterialProperty()));
         materialCode.setStatus(trimToNull(materialCode.getStatus()));
 
-        if (!materialCodeMapper.list(new MaterialCode().setMaterialCode(materialCode.getMaterialCode())).isEmpty()
+        if (!materialCodeMapper.list(new MaterialCode().setMaterialCode(materialCode.getMaterialCode()).setCreatorId(currentUserId())).isEmpty()
                 && !materialCode.getMaterialCode().equals(existMaterialCode.getMaterialCode())) {
             return Result.fail("物料代码已存在");
         }
@@ -137,10 +137,17 @@ public class MaterialCodeService implements IMaterialCodeService {
 
     @Override
     public Result deleteById(Long id) {
+        if (currentUserId() == null) {
+            return Result.fail("未登录，请先登录");
+        }
         if (id == null) {
             return Result.fail(ResultCode.BAD_REQUEST, "物料代码ID不能为空");
         }
-        int rows = materialCodeMapper.deleteById(id);
+        MaterialCode existMaterialCode = materialCodeMapper.getById(id, currentUserId());
+        if (existMaterialCode == null) {
+            return Result.fail(ResultCode.NOT_FOUND, "物料代码不存在或无权限删除");
+        }
+        int rows = materialCodeMapper.deleteById(id, currentUserId());
         if (rows <= 0) {
             return Result.fail("删除物料代码失败");
         }
@@ -149,10 +156,18 @@ public class MaterialCodeService implements IMaterialCodeService {
 
     @Override
     public Result batchDeleteMaterialCode(List<Long> ids) {
+        if (currentUserId() == null) {
+            return Result.fail("未登录，请先登录");
+        }
         if (ids == null || ids.isEmpty()) {
             return Result.fail(ResultCode.BAD_REQUEST, "删除ID列表不能为空");
         }
-        int rows = materialCodeMapper.batchDeleteByIds(ids);
+        for (Long id : ids) {
+            if (materialCodeMapper.getById(id, currentUserId()) == null) {
+                return Result.fail(ResultCode.NOT_FOUND, "存在不存在或无权限的物料代码");
+            }
+        }
+        int rows = materialCodeMapper.batchDeleteByIds(ids, currentUserId());
         if (rows <= 0) {
             return Result.fail("删除物料代码失败");
         }

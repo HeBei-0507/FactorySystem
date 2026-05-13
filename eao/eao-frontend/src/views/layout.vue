@@ -138,7 +138,11 @@ const menuGroups = [
   },
   {
     title: '点检管理',
-    items: [{ label: '点检路线管理', icon: Guide, path: '/inspection/inspection-route' }]
+    items: [
+      { label: '点检路线管理', icon: Guide, path: '/inspection/inspection-route' },
+      { label: '点检实绩查询', icon: Finished, path: '/inspection/inspection-record-query' },
+      { label: '点检计划查询', icon: Document, path: '/inspection/inspection-plan-query' }
+    ]
   },
   {
     title: '巡检管理',

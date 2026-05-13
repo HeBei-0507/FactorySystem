@@ -26,8 +26,14 @@ public class IDAddressService implements IIDAddressService {
 
     @Override
     public Result addIDAddress(IDAddress idAddress) {
+        String currentUsername = currentUsername();
+        if (currentUsername == null) {
+            return Result.fail("未登录，请先登录");
+        }
         normalize(idAddress);
-        if (currentUsername() != null && idAddressMapper.getByCodeAndCreatorUsername(idAddress.getIdLocationCode(), currentUsername()) != null) {
+        idAddress.setCreatorUsername(currentUsername);
+        idAddress.setCreatorName(currentRealName());
+        if (idAddressMapper.getByCodeAndCreatorUsername(idAddress.getIdLocationCode(), currentUsername) != null) {
             return Result.fail("ID位置编码已存在");
         }
         if (idAddress.getCreatedAt() == null) {
@@ -151,6 +157,11 @@ public class IDAddressService implements IIDAddressService {
     private String currentUsername() {
         SysUser user = UserContext.getUser();
         return user == null ? null : trimToNull(user.getUsername());
+    }
+
+    private String currentRealName() {
+        SysUser user = UserContext.getUser();
+        return user == null ? null : trimToNull(user.getRealName());
     }
 
     private void normalize(IDAddress idAddress) {

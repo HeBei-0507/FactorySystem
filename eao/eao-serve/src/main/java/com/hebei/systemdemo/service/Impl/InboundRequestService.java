@@ -117,7 +117,7 @@ public class InboundRequestService implements IInboundRequestService {
     private Result validateReference(InboundRequest inboundRequest) {
         MaterialCode query = new MaterialCode();
         query.setMaterialCode(inboundRequest.getMaterialCode());
-        List<MaterialCode> materialCodes = materialCodeMapper.list(query);
+        List<MaterialCode> materialCodes = materialCodeMapper.list(query.setCreatorId(currentUserId()));
         if (materialCodes == null || materialCodes.isEmpty()) return Result.fail("所选物料不存在");
         MaterialCode materialCode = materialCodes.get(0);
         if (!"02-激活".equals(materialCode.getStatus())) return Result.fail("所选物料状态不是02-激活");

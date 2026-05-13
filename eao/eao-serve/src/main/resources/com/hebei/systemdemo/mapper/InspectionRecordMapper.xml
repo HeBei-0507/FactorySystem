@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hebei.systemdemo.mapper.InspectionRecordMapper">
+
+    <sql id="baseSelect">
+        SELECT ir.id,
+               ir.inspection_standard_id AS inspectionStandardId,
+               ir.production_line_id AS productionLineId,
+               pl.line_name AS productionLineName,
+               ir.route_id AS routeId,
+               ir.route_code AS routeCode,
+               ir.route_name AS routeName,
+               ir.plan_date AS planDate,
+               ir.current_result AS currentResult,
+               ir.abnormal_type AS abnormalType,
+               ir.abnormal_phenomenon AS abnormalPhenomenon,
+               ir.plan_source AS planSource,
+               ir.standard_code AS standardCode,
+               ir.part_code AS partCode,
+               ir.part_name AS partName,
+               ir.inspection_part AS inspectionPart,
+               ir.inspection_content AS inspectionContent,
+               ir.completed_at AS completedAt,
+               ir.implementation_cycle AS implementationCycle,
+               ir.cycle_unit AS cycleUnit,
+               ir.completion_flag AS completionFlag,
+               ir.qualitative_standard AS qualitativeStandard,
+               ir.standard_category AS standardCategory,
+               ir.quantitative_standard AS quantitativeStandard,
+               ir.unit_of_measurement AS unitOfMeasurement,
+               ir.upper_limit AS upperLimit,
+               ir.lower_limit AS lowerLimit,
+               ir.id_location_code AS idLocationCode,
+               ir.id_location_name AS idLocationName,
+               ir.abnormal_contact_sheet AS abnormalContactSheet,
+               ir.creator_id AS creatorId,
+               su.username AS creatorUsername,
+               su.real_name AS creatorName,
+               ir.created_at AS createdAt,
+               ir.updated_at AS updatedAt
+        FROM inspection_record ir
+        LEFT JOIN production_line pl ON ir.production_line_id = pl.id
+        LEFT JOIN sys_user su ON ir.creator_id = su.id
+    </sql>
+
+    <insert id="add" parameterType="com.hebei.systemdemo.domain.po.InspectionRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inspection_record (
+            inspection_standard_id, production_line_id, route_id, route_code, route_name,
+            plan_date, current_result, abnormal_type, abnormal_phenomenon, plan_source,
+            standard_code, part_code, part_name, inspection_part, inspection_content,
+            completed_at, implementation_cycle, cycle_unit, completion_flag,
+            qualitative_standard, standard_category, quantitative_standard, unit_of_measurement,
+            upper_limit, lower_limit, id_location_code, id_location_name, abnormal_contact_sheet,
+            creator_id, created_at, updated_at
+        ) VALUES (
+            #{inspectionStandardId}, #{productionLineId}, #{routeId}, #{routeCode}, #{routeName},
+            #{planDate}, #{currentResult}, #{abnormalType}, #{abnormalPhenomenon}, #{planSource},
+            #{standardCode}, #{partCode}, #{partName}, #{inspectionPart}, #{inspectionContent},
+            #{completedAt}, #{implementationCycle}, #{cycleUnit}, #{completionFlag},
+            #{qualitativeStandard}, #{standardCategory}, #{quantitativeStandard}, #{unitOfMeasurement},
+            #{upperLimit}, #{lowerLimit}, #{idLocationCode}, #{idLocationName}, #{abnormalContactSheet},
+            #{creatorId}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById">
+        UPDATE inspection_record
+        <set>
+            <if test="record.productionLineId != null">production_line_id = #{record.productionLineId},</if>
+            <if test="record.routeId != null">route_id = #{record.routeId},</if>
+            <if test="record.routeCode != null">route_code = #{record.routeCode},</if>
+            <if test="record.routeName != null">route_name = #{record.routeName},</if>
+            <if test="record.planDate != null">plan_date = #{record.planDate},</if>
+            <if test="record.currentResult != null">current_result = #{record.currentResult},</if>
+            <if test="record.abnormalType != null">abnormal_type = #{record.abnormalType},</if>
+            <if test="record.abnormalPhenomenon != null">abnormal_phenomenon = #{record.abnormalPhenomenon},</if>
+            <if test="record.planSource != null">plan_source = #{record.planSource},</if>
+            <if test="record.standardCode != null">standard_code = #{record.standardCode},</if>
+            <if test="record.partCode != null">part_code = #{record.partCode},</if>
+            <if test="record.partName != null">part_name = #{record.partName},</if>
+            <if test="record.inspectionPart != null">inspection_part = #{record.inspectionPart},</if>
+            <if test="record.inspectionContent != null">inspection_content = #{record.inspectionContent},</if>
+            <if test="record.completedAt != null">completed_at = #{record.completedAt},</if>
+            <if test="record.implementationCycle != null">implementation_cycle = #{record.implementationCycle},</if>
+            <if test="record.cycleUnit != null">cycle_unit = #{record.cycleUnit},</if>
+            <if test="record.completionFlag != null">completion_flag = #{record.completionFlag},</if>
+            <if test="record.qualitativeStandard != null">qualitative_standard = #{record.qualitativeStandard},</if>
+            <if test="record.standardCategory != null">standard_category = #{record.standardCategory},</if>
+            <if test="record.quantitativeStandard != null">quantitative_standard = #{record.quantitativeStandard},</if>
+            <if test="record.unitOfMeasurement != null">unit_of_measurement = #{record.unitOfMeasurement},</if>
+            <if test="record.upperLimit != null">upper_limit = #{record.upperLimit},</if>
+            <if test="record.lowerLimit != null">lower_limit = #{record.lowerLimit},</if>
+            <if test="record.idLocationCode != null">id_location_code = #{record.idLocationCode},</if>
+            <if test="record.idLocationName != null">id_location_name = #{record.idLocationName},</if>
+            <if test="record.abnormalContactSheet != null">abnormal_contact_sheet = #{record.abnormalContactSheet},</if>
+            <if test="record.updatedAt != null">updated_at = #{record.updatedAt},</if>
+        </set>
+        WHERE id = #{record.id}
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+    </update>
+
+    <select id="getById" resultType="com.hebei.systemdemo.domain.po.InspectionRecord">
+        <include refid="baseSelect"/>
+        WHERE ir.id = #{id}
+        <if test="creatorId != null">AND ir.creator_id = #{creatorId}</if>
+    </select>
+
+    <select id="page" resultType="com.hebei.systemdemo.domain.po.InspectionRecord">
+        <include refid="baseSelect"/>
+        <where>
+            <if test="creatorId != null">AND ir.creator_id = #{creatorId}</if>
+            <if test="productionLineId != null">AND ir.production_line_id = #{productionLineId}</if>
+            <if test="routeId != null">AND ir.route_id = #{routeId}</if>
+            <if test="planDateStart != null and planDateStart != ''">AND ir.plan_date &gt;= #{planDateStart}</if>
+            <if test="planDateEnd != null and planDateEnd != ''">AND ir.plan_date &lt;= #{planDateEnd}</if>
+            <if test="completionFlag != null and completionFlag != ''">AND ir.completion_flag = #{completionFlag}</if>
+            <if test="partCode != null and partCode != ''">AND ir.part_code LIKE CONCAT('%', #{partCode}, '%')</if>
+            <if test="partName != null and partName != ''">AND ir.part_name LIKE CONCAT('%', #{partName}, '%')</if>
+        </where>
+        ORDER BY ir.id DESC
+    </select>
+
+    <delete id="deleteById">DELETE FROM inspection_record WHERE id = #{id} <if test="creatorId != null">AND creator_id = #{creatorId}</if></delete>
+
+    <delete id="batchDeleteByIds">
+        DELETE FROM inspection_record WHERE
+        <if test="creatorId != null">creator_id = #{creatorId} AND </if>
+        id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+    <select id="listByInspectionStandardId" resultType="com.hebei.systemdemo.domain.po.InspectionRecord">
+        <include refid="baseSelect"/>
+        WHERE ir.inspection_standard_id = #{inspectionStandardId}
+        <if test="creatorId != null">AND ir.creator_id = #{creatorId}</if>
+        ORDER BY ir.id DESC
+    </select>
+</mapper>

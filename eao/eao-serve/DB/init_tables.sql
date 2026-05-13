@@ -90,6 +90,7 @@ create table equipment
         primary key,
     unit_code            varchar(50)                        not null comment '设备单元编码',
     unit_name            varchar(100)                       not null comment '设备单元名称',
+    device_unit_id       bigint unsigned                    null comment '设备单元ID',
     equipment_code       varchar(50)                        not null comment '设备编码',
     equipment_name       varchar(100)                       not null comment '设备名称',
     maintainer_name      varchar(100)                       null comment '设备维护人',
@@ -100,16 +101,20 @@ create table equipment
     act_team             varchar(100)                       null comment '操作班组',
     created_at           datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at           datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    constraint uk_equipment_code
-        unique (equipment_code),
-    constraint fk_equipment_unit_code
-        foreign key (unit_code) references device_unit (unit_code)
+    creator_id           bigint unsigned                    null comment '创建人ID',
+    constraint uk_equipment_creator_code
+        unique (creator_id, equipment_code),
+    constraint fk_equipment_device_unit_id
+        foreign key (device_unit_id) references device_unit (id)
             on update cascade on delete cascade
 )
     comment '设备表';
 
-create index idx_unit_code
-    on equipment (unit_code);
+create index idx_equipment_creator_id
+    on equipment (creator_id);
+
+create index idx_equipment_device_unit_id
+    on equipment (device_unit_id);
 
 
 
@@ -122,6 +127,7 @@ CREATE TABLE equipment_part (
 
     device_code VARCHAR(100) NOT NULL COMMENT '设备编码',
     device_name VARCHAR(100) COMMENT '设备名称',
+    equipment_id bigint unsigned null comment '设备ID',
 
     part_code VARCHAR(100) NOT NULL COMMENT '设备部位编码',
     part_name VARCHAR(100) NOT NULL COMMENT '设备部位名称',
@@ -140,9 +146,21 @@ CREATE TABLE equipment_part (
     created_at           datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updated_at           datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
 
-    UNIQUE KEY uk_part_code(part_code),
-    INDEX idx_device_code(device_code)
+    constraint uk_equipment_part_creator_equipment_part
+        unique (creator_id, equipment_id, part_code),
+    constraint fk_equipment_part_equipment_id
+        foreign key (equipment_id) references equipment (id)
+            on update cascade on delete cascade
 ) COMMENT='设备部位表';
+
+create index idx_device_code
+    on equipment_part (device_code);
+
+create index idx_equipment_part_creator_id
+    on equipment_part (creator_id);
+
+create index idx_equipment_part_equipment_id
+    on equipment_part (equipment_id);
 
 
 -- =====================================
@@ -320,7 +338,46 @@ CREATE TABLE failure_record (
 ) COMMENT='故障录入主表';
 
 -- =====================================
--- 12.故障处理表
+-- 13.点检实绩表
+-- =====================================
+DROP TABLE IF EXISTS inspection_record;
+create table inspection_record(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    inspection_standard_id BIGINT COMMENT '点检标准ID',
+    production_line_id bigint unsigned not null comment '生产线ID',
+    route_id BIGINT COMMENT '点检路线ID',
+    route_code VARCHAR(100) COMMENT '路线编号',
+    route_name VARCHAR(100) COMMENT '路线名称',
+    plan_date VARCHAR(32) NOT NULL COMMENT '计划日期',
+    current_result VARCHAR(10) COMMENT '当前结果',
+    abnormal_type VARCHAR(10) COMMENT '异常类型',
+    abnormal_phenomenon VARCHAR(500) COMMENT '异常现象',
+    plan_source VARCHAR(32) COMMENT '计划来源',
+    standard_code VARCHAR(100) COMMENT '标准编号',
+    part_code VARCHAR(100) NOT NULL COMMENT '设备部位编码',
+    part_name VARCHAR(100) COMMENT '设备部位名称',
+    inspection_part VARCHAR(100) COMMENT '点检部位',
+    inspection_content VARCHAR(255) COMMENT '点检内容',
+    completed_at VARCHAR(32) COMMENT '完工日期',
+    implementation_cycle INT COMMENT '周期',
+    cycle_unit VARCHAR(100) COMMENT '周期单位',
+    completion_flag VARCHAR(10) COMMENT '完工标记',
+    qualitative_standard VARCHAR(255) COMMENT '定性标准',
+    standard_category VARCHAR(100) COMMENT '标准类别',
+    quantitative_standard VARCHAR(255) COMMENT '定量标准',
+    unit_of_measurement VARCHAR(100) COMMENT '计量单位',
+    upper_limit VARCHAR(255) COMMENT '上限',
+    lower_limit VARCHAR(255) COMMENT '下限',
+    id_location_code VARCHAR(64) COMMENT 'ID位置编码',
+    id_location_name VARCHAR(128) COMMENT 'ID位置',
+    abnormal_contact_sheet VARCHAR(100) COMMENT '异常联络单',
+    creator_id bigint unsigned null comment '创建人ID',
+    created_at datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
+) comment='点检实绩表';
+
+-- =====================================
+-- 14.故障处理表
 -- ==========
 DROP TABLE IF EXISTS failure_deal;
 CREATE TABLE failure_deal (

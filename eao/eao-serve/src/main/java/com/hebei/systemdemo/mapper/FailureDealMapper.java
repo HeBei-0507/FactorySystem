@@ -9,9 +9,11 @@ import java.util.List;
 
 @Mapper
 public interface FailureDealMapper {
-    FailureDeal getByFailureId(@Param("failureId") Long failureId);
+    FailureDeal getByFailureId(@Param("failureId") Long failureId,
+                               @Param("creatorUsername") String creatorUsername);
 
-    int deleteByFailureId(@Param("failureId") Long failureId);
+    int deleteByFailureId(@Param("failureId") Long failureId,
+                          @Param("creatorUsername") String creatorUsername);
 
     int add(FailureDeal failureDeal);
 

@@ -28,6 +28,7 @@ public class SysUserController {
         return sysUserService.register(user);
     }
 
+    @RequireLogin
     @OperateLog(module = "用户管理", operation = "查询用户信息", saveParams = false, saveResult = false)
     @GetMapping("/info/{id}")
     public Result getUserInfo(@PathVariable Long id) {

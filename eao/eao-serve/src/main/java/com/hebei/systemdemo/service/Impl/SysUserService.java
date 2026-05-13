@@ -60,37 +60,23 @@ public class SysUserService implements ISysUserService {
 
     @Override
     public Result register(SysUser user) {
-        if (!StringUtils.hasText(user.getUsername()) || !StringUtils.hasText(user.getPasswordHash())) {
-            return Result.fail("用户名和密码不能为空");
-        }
-
-        SysUser existUser = sysUserMapper.getByUsername(user.getUsername());
-        if (existUser != null) {
-            return Result.fail("用户名已存在");
-        }
-
-        user.setPasswordHash(DigestUtil.md5Hex(user.getPasswordHash()));
-        user.setStatus(1);
-        user.setIsDeleted(0);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-
-        int rows = sysUserMapper.insert(user);
-        if (rows <= 0 || user.getId() == null) {
-            return Result.fail("注册失败");
-        }
-
-        log.info("用户注册成功: {}, ID: {}", user.getUsername(), user.getId());
-        return Result.ok(java.util.Collections.singletonMap("id", user.getId()));
+        return Result.fail("考试环境已禁用注册功能");
     }
 
     @Override
     public Result getUserInfo(Long id) {
+        Long currentUserId = UserContext.getUserId();
+        if (currentUserId == null) {
+            return Result.fail("未登录，请先登录");
+        }
         if (id == null) {
             return Result.fail("用户ID不能为空");
         }
+        if (!currentUserId.equals(id)) {
+            return Result.fail("仅允许查看当前登录用户信息");
+        }
 
-        SysUser user = sysUserMapper.getById(id);
+        SysUser user = sysUserMapper.getById(currentUserId);
         if (user == null) {
             return Result.fail("用户不存在");
         }
@@ -101,11 +87,18 @@ public class SysUserService implements ISysUserService {
 
     @Override
     public Result updateUserInfo(SysUser user) {
+        Long currentUserId = UserContext.getUserId();
+        if (currentUserId == null) {
+            return Result.fail("未登录，请先登录");
+        }
         if (user.getId() == null) {
             return Result.fail("用户ID不能为空");
         }
+        if (!currentUserId.equals(user.getId())) {
+            return Result.fail("仅允许修改当前登录用户信息");
+        }
 
-        SysUser existUser = sysUserMapper.getById(user.getId());
+        SysUser existUser = sysUserMapper.getById(currentUserId);
         if (existUser == null) {
             return Result.fail("用户不存在");
         }

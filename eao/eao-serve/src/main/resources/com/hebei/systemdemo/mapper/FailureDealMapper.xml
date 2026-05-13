@@ -7,20 +7,29 @@
 
     <select id="getByFailureId" resultType="com.hebei.systemdemo.domain.po.FailureDeal">
         SELECT
-            id,
-            failure_id AS failureId,
-            severity_level AS severityLevel,
-            process_time AS processTime,
-            process_description AS processDescription,
-            created_at AS createdAt,
-            updated_at AS updatedAt
-        FROM failure_deal
-        WHERE failure_id = #{failureId}
+            d.id,
+            d.failure_id AS failureId,
+            d.severity_level AS severityLevel,
+            d.process_time AS processTime,
+            d.process_description AS processDescription,
+            d.created_at AS createdAt,
+            d.updated_at AS updatedAt
+        FROM failure_deal d
+        INNER JOIN failure_record f ON f.id = d.failure_id
+        WHERE d.failure_id = #{failureId}
+        <if test="creatorUsername != null and creatorUsername != ''">
+            AND f.creator_username = #{creatorUsername}
+        </if>
         LIMIT 1
     </select>
 
     <delete id="deleteByFailureId">
-        DELETE FROM failure_deal WHERE failure_id = #{failureId}
+        DELETE d FROM failure_deal d
+        INNER JOIN failure_record f ON f.id = d.failure_id
+        WHERE d.failure_id = #{failureId}
+        <if test="creatorUsername != null and creatorUsername != ''">
+            AND f.creator_username = #{creatorUsername}
+        </if>
     </delete>
 
     <insert id="add" parameterType="com.hebei.systemdemo.domain.po.FailureDeal" useGeneratedKeys="true" keyProperty="id">

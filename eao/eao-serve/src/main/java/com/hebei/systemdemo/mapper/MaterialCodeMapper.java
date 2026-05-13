@@ -25,7 +25,9 @@ public interface MaterialCodeMapper {
                             @Param("status") String status,
                             @Param("creatorId") Long creatorId);
 
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id,
+                   @Param("creatorId") Long creatorId);
 
-    int batchDeleteByIds(@Param("ids") List<Long> ids);
+    int batchDeleteByIds(@Param("ids") List<Long> ids,
+                         @Param("creatorId") Long creatorId);
 }

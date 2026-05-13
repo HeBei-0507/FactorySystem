@@ -161,7 +161,7 @@ public class MaintenanceStandardService implements IMaintenanceStandardService {
     private boolean fillBase(MaintenanceStandard ms) {
         String partCode = t(ms.getPartCode());
         if (!StringUtils.hasText(partCode)) return false;
-        List<EquipmentPart> parts = equipmentPartMapper.list(new EquipmentPart().setPartCode(partCode));
+        List<EquipmentPart> parts = equipmentPartMapper.list(new EquipmentPart().setPartCode(partCode).setCreatorId(currentUserId()));
         if (parts == null || parts.isEmpty()) return false;
         EquipmentPart part = parts.get(0);
         ms.setPartCode(partCode);

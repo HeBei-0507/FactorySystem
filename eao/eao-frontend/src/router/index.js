@@ -78,6 +78,18 @@ const router = createRouter({
       meta: { title: '点检路线管理' }
     },
     {
+      path: '/inspection/inspection-record-query',
+      name: 'InspectionRecordQuery',
+      component: () => import('@/views/Inspection/InspectionRecordQuery.vue'),
+      meta: { title: '点检实绩查询' }
+    },
+    {
+      path: '/inspection/inspection-plan-query',
+      name: 'InspectionPlanQuery',
+      component: () => import('@/views/Inspection/InspectionPlanQuery.vue'),
+      meta: { title: '点检计划查询' }
+    },
+    {
       path: '/patrol/patrol-info',
       name: 'PatrolInfo',
       component: () => import('@/views/Patrol/PatrolInfo.vue'),

@@ -9,9 +9,11 @@ import java.util.List;
 
 @Mapper
 public interface AbnormalityDealMapper {
-    AbnormalityDeal getByAbnormalityId(@Param("abnormalityId") Long abnormalityId);
+    AbnormalityDeal getByAbnormalityId(@Param("abnormalityId") Long abnormalityId,
+                                       @Param("creatorUsername") String creatorUsername);
 
-    int deleteByAbnormalityId(@Param("abnormalityId") Long abnormalityId);
+    int deleteByAbnormalityId(@Param("abnormalityId") Long abnormalityId,
+                              @Param("creatorUsername") String creatorUsername);
 
     int add(AbnormalityDeal abnormalityDeal);
 

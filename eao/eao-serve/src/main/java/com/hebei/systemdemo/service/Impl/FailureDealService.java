@@ -54,7 +54,7 @@ public class FailureDealService implements IFailureDealService {
         if (failure == null) return Result.fail(ResultCode.NOT_FOUND, "故障记录不存在或无权限访问");
         Map<String, Object> data = new HashMap<>();
         data.put("failure", failure);
-        data.put("deal", failureDealMapper.getByFailureId(failureId));
+        data.put("deal", failureDealMapper.getByFailureId(failureId, currentUsername()));
         return Result.ok(data);
     }
 
@@ -86,7 +86,7 @@ public class FailureDealService implements IFailureDealService {
         Failure failure = failureMapper.getById(failureId, currentUsername());
         if (failure == null) return Result.fail(ResultCode.NOT_FOUND, "故障记录不存在或无权限访问");
         if (!STATUS_PENDING_APPROVE.equals(failure.getStatus()) && !STATUS_APPROVED.equals(failure.getStatus())) return Result.fail("当前故障记录状态不允许执行该操作");
-        failureDealMapper.deleteByFailureId(failureId);
+        failureDealMapper.deleteByFailureId(failureId, currentUsername());
         failureMapper.updateById(new Failure().setId(failureId).setStatus(STATUS_PENDING_SUBMIT).setUpdatedAt(nowString()));
         return Result.ok("回退成功", null);
     }
@@ -114,7 +114,7 @@ public class FailureDealService implements IFailureDealService {
         Failure failure = failureMapper.getById(failureId, currentUsername());
         if (failure == null) return Result.fail(ResultCode.NOT_FOUND, "故障记录不存在或无权限访问");
         if (!expectedStatus.equals(failure.getStatus())) return Result.fail("当前故障记录状态不允许执行该操作");
-        failureDealMapper.deleteByFailureId(failureId);
+        failureDealMapper.deleteByFailureId(failureId, currentUsername());
         failureMapper.updateById(new Failure().setId(failureId).setStatus(STATUS_PENDING_SUBMIT).setUpdatedAt(nowString()));
         return Result.ok("回退成功", null);
     }
@@ -127,7 +127,7 @@ public class FailureDealService implements IFailureDealService {
         if (!fromStatus.equals(failure.getStatus())) return Result.fail("当前故障记录状态不允许执行该操作");
         normalize(failureDeal);
         String now = nowString();
-        FailureDeal existing = failureDealMapper.getByFailureId(failureDeal.getFailureId());
+        FailureDeal existing = failureDealMapper.getByFailureId(failureDeal.getFailureId(), currentUsername());
         if (existing == null) {
             failureDeal.setCreatedAt(now);
             failureDeal.setUpdatedAt(now);

@@ -81,10 +81,10 @@ async function onSubmit() {
   <div class="login-page">
     <div class="login-card">
       <div class="login-brand">
-        <div class="brand-badge">宝</div>
+        <div class="brand-badge">高仁</div>
         <div>
-          <div class="brand-line1">宝信软件 海卓力克</div>
-          <div class="brand-line2">设备管理与智能运维系统</div>
+          <div class="brand-line1">智能点检系统</div>
+          <div class="brand-line2">天津高仁科技有限公司</div>
         </div>
       </div>
       <h1 class="login-title">用户登录</h1>
@@ -111,7 +111,7 @@ async function onSubmit() {
           登录
         </el-button>
         <div class="login-extra">
-          <router-link to="/register" class="link">没有账号？去注册</router-link>
+          <span class="login-tip">账号由系统统一导入，请联系管理员分配登录信息</span>
         </div>
       </el-form>
     </div>
