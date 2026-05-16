@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class FailureService implements IFailureService {
@@ -59,8 +60,8 @@ public class FailureService implements IFailureService {
     @Override
     public Result add(Failure failure) {
         normalize(failure);
-        if (!StringUtils.hasText(failure.getFailureCode())) return Result.fail("故障编号不能为空");
         fillCreatorInfo(failure);
+        failure.setFailureCode(generateFailureCode());
         if (!StringUtils.hasText(failure.getStatus())) failure.setStatus(STATUS_PENDING_SUBMIT);
         String now = nowString();
         failure.setCreatedAt(now);
@@ -151,5 +152,11 @@ public class FailureService implements IFailureService {
 
     private String nowString() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    private String generateFailureCode() {
+        return "GZ"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"))
+                + String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
     }
 }

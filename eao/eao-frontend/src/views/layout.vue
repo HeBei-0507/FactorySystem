@@ -174,7 +174,8 @@ const menuGroups = [
     title: '物料管理',
     items: [
       { label: '库区库位管理', icon: House, path: '/material-manage/warehouse-manage' },
-      { label: '入库申请', icon: House, path: '/material-manage/inbound-request' }
+      { label: '入库申请', icon: House, path: '/material-manage/inbound-request' },
+      { label: '入库审核', icon: House, path: '/material-manage/inbound-approve' }
     ]
   },
   {

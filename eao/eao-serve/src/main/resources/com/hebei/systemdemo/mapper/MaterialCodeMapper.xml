@@ -23,6 +23,9 @@
             modified_at AS modifiedAt
         FROM material_code
         <where>
+            <if test="creatorId != null">
+                AND creator_id = #{creatorId}
+            </if>
             <if test="materialCode != null and materialCode != ''">
                 AND material_code = #{materialCode}
             </if>

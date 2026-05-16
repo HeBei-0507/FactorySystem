@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class InboundRequestService implements IInboundRequestService {
@@ -81,7 +82,7 @@ public class InboundRequestService implements IInboundRequestService {
         normalize(inboundRequest);
         inboundRequest.setInboundAmount(calcAmount(inboundRequest.getInboundQty(), inboundRequest.getUnitPrice()));
         inboundRequest.setUpdatedAt(nowString());
-        int rows = inboundRequestMapper.updateById(inboundRequest);
+        int rows = inboundRequestMapper.updateById(inboundRequest, currentUserId());
         if (rows <= 0) return Result.fail("更新入库申请失败");
         return Result.ok();
     }
@@ -95,7 +96,7 @@ public class InboundRequestService implements IInboundRequestService {
             if (exist == null) return Result.fail(ResultCode.NOT_FOUND, "存在不存在或无权限的入库申请");
             if (!"00-待确认入库".equals(exist.getInboundStatus())) return Result.fail("仅待确认入库状态允许确认");
         }
-        int rows = inboundRequestMapper.confirmByIds(ids, nowString());
+        int rows = inboundRequestMapper.confirmByIds(ids, nowString(), currentUserId());
         if (rows <= 0) return Result.fail("确认入库失败");
         return Result.ok(String.format("成功确认%d条入库申请", rows), Collections.singletonMap("confirmedCount", rows));
     }
@@ -109,7 +110,7 @@ public class InboundRequestService implements IInboundRequestService {
             if (exist == null) return Result.fail(ResultCode.NOT_FOUND, "存在不存在或无权限的入库申请");
             if (!"00-待确认入库".equals(exist.getInboundStatus())) return Result.fail("仅待确认入库状态允许删除");
         }
-        int rows = inboundRequestMapper.batchDeleteByIds(ids);
+        int rows = inboundRequestMapper.batchDeleteByIds(ids, currentUserId());
         if (rows <= 0) return Result.fail("删除入库申请失败");
         return Result.ok(String.format("成功删除%d条记录", rows), Collections.singletonMap("deletedCount", rows));
     }
@@ -151,7 +152,9 @@ public class InboundRequestService implements IInboundRequestService {
     }
 
     private String generateInboundNo() {
-        return "RK" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        return "RK"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"))
+                + String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
     }
 
     private String trimToNull(String value) {

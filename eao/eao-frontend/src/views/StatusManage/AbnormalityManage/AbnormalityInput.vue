@@ -74,10 +74,11 @@ const optionLabel = (options, value) =>
   options.find((item) => item.value === value)?.label || value || ''
 
 function createAbnormalCode() {
-  // 先用前端时间戳生成可读单号，避免用户新增时还未落库就没有业务编号可见。
   const d = new Date()
   const p = (v) => String(v).padStart(2, '0')
-  return `YC${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
+  const ms = (v) => String(v).padStart(3, '0')
+  const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+  return `YC${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${ms(d.getMilliseconds())}${random}`
 }
 function resetForm() {
   Object.assign(form, {

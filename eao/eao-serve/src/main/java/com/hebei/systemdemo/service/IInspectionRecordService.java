@@ -10,6 +10,9 @@ public interface IInspectionRecordService {
                 String planDateStart, String planDateEnd, String completionFlag,
                 String partCode, String partName);
 
+    Result planSummaryPage(Integer current, Integer size, Long productionLineId,
+                           String routeName, String planSource);
+
     Result getById(Long id);
 
     Result add(InspectionRecord inspectionRecord);

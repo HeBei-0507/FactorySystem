@@ -25,6 +25,11 @@ public interface InspectionRecordMapper {
                                 @Param("partName") String partName,
                                 @Param("creatorId") Long creatorId);
 
+    List<InspectionRecord> planSummaryPage(@Param("productionLineId") Long productionLineId,
+                                           @Param("routeName") String routeName,
+                                           @Param("planSource") String planSource,
+                                           @Param("creatorId") Long creatorId);
+
     int deleteById(@Param("id") Long id,
                    @Param("creatorId") Long creatorId);
 

@@ -33,6 +33,9 @@ public class LubricationStandardController {
     @GetMapping("/page")
     public Result page(@RequestParam Integer current,
                        @RequestParam Integer size,
+                       @RequestParam(required = false) Long productionLineId,
+                       @RequestParam(required = false) Long deviceUnitId,
+                       @RequestParam(required = false) Long equipmentId,
                        @RequestParam(required = false) String standardCode,
                        @RequestParam(required = false) String partCode,
                        @RequestParam(required = false) String partName,
@@ -40,7 +43,7 @@ public class LubricationStandardController {
                        @RequestParam(required = false) String oilModels,
                        @RequestParam(required = false) String profession,
                        @RequestParam(required = false) String oilFeedType) {
-        return lubricationStandardService.page(current, size, standardCode, partCode, partName, 
+        return lubricationStandardService.page(current, size, productionLineId, deviceUnitId, equipmentId, standardCode, partCode, partName,
                 feedPoint, oilModels, profession, oilFeedType);
     }
 

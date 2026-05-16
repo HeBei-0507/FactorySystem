@@ -860,7 +860,7 @@ loadIDAddressOptions()
             />
           </div>
           <div class="filter-item">
-            <span class="filter-label">部位编码</span>
+            <span class="filter-label">设备部位编码</span>
             <el-input
               v-model="inspectionFilters.partCode"
               :disabled="!activeDeviceId"
@@ -870,7 +870,7 @@ loadIDAddressOptions()
             />
           </div>
           <div class="filter-item">
-            <span class="filter-label">部位名称</span>
+            <span class="filter-label">设备部位名称</span>
             <el-select
               v-model="selectedPartCode"
               class="sel-full"
@@ -1010,7 +1010,7 @@ loadIDAddressOptions()
           />
           <div class="toolbar-right">
             <div class="import-actions">
-              <a class="template-link" href="/1.四轴机器人单元点检标准.xlsx" download>下载模板</a>
+              <a class="template-link" href="../../../MD/点检标准.xlsx" download>下载模板</a>
               <el-button
                 type="primary"
                 plain
@@ -1045,9 +1045,9 @@ loadIDAddressOptions()
         >
           <el-table-column type="selection" width="48" align="center" />
           <el-table-column label="点检标准名称" prop="inspectionName" min-width="170" />
-          <el-table-column label="部位编码" prop="partCode" min-width="120" />
-          <el-table-column label="部位名称" prop="partName" min-width="140" />
-          <el-table-column label="执行周期" prop="implementationCycle" min-width="90" />
+          <el-table-column label="设备部位编码" prop="partCode" min-width="120" />
+          <el-table-column label="设备部位名称" prop="partName" min-width="140" />
+          <el-table-column label="实施周期" prop="implementationCycle" min-width="90" />
           <el-table-column label="周期单位" min-width="90">
             <template #default="{ row }">
               {{ optionLabel(optionCycleUnit, row.cycleUnit) }}
@@ -1152,7 +1152,7 @@ loadIDAddressOptions()
         </el-row>
         <el-row :gutter="16">
           <el-col :xs="24" :sm="24" :md="8">
-            <el-form-item label="执行周期">
+            <el-form-item label="实施周期">
               <el-input-number
                 v-model="inspectionForm.implementationCycle"
                 :min="0"

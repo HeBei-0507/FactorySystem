@@ -5,7 +5,8 @@ import com.hebei.systemdemo.domain.dto.lubricationStandard.LubricationStandardIm
 import com.hebei.systemdemo.domain.po.LubricationStandard;
 
 public interface ILubricationStandardService {
-    Result page(Integer current, Integer size, String standardCode, String partCode, String partName,
+    Result page(Integer current, Integer size, Long productionLineId, Long deviceUnitId, Long equipmentId,
+                String standardCode, String partCode, String partName,
                 String feedPoint, String oilModels, String profession, String oilFeedType);
 
     Result getById(Long id);

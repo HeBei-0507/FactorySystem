@@ -6,3 +6,4 @@ export const updateInboundRequest = (data) => request.put('/inboundRequest/updat
 export const confirmInboundRequest = (ids) => request.put('/inboundRequest/confirmInbound', ids)
 export const batchDeleteInboundRequest = (ids) =>
   request.delete('/inboundRequest/batchDelete', { data: ids })
+export const getInboundApprovePage = (params) => request.get('/inboundRequest/page', { params })

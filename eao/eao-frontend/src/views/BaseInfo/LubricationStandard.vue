@@ -3,7 +3,7 @@ import { computed, nextTick, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getProductionlineList } from '@/api/prodectionLine'
 import { getDeviceUtilList } from '@/api/deviceUnit'
-import { getEquipmentById, getEquipmentListByDeviceUnitId } from '@/api/equipment'
+import { getEquipmentListByDeviceUnitId } from '@/api/equipment'
 import { getEquipmentPartListByEquipmentId } from '@/api/equipmentPart'
 import {
   addLubricationStandard,
@@ -15,11 +15,17 @@ import { extractPageData, extractRecordsArray } from '@/util/apiData'
 
 const pageTitle = '润滑标准管理'
 const productionLines = ref([])
-const activeLineId = ref('')
-const activeUnitId = ref('')
-const activeDeviceId = ref('')
 const expandedUnitIds = ref([])
-
+const expandedDeviceIds = ref([])
+const lubricationRows = ref([])
+const lubricationSelectedRows = ref([])
+const lubricationLoading = ref(false)
+const lubricationSelectionSyncLocked = ref(false)
+const lubricationPagination = reactive({ currentPage: 1, pageSize: 10, total: 0 })
+const lubricationDrawerVisible = ref(false)
+const lubricationDrawerMode = ref('create')
+const lubricationDrawerSaving = ref(false)
+const activeNode = reactive({ type: 'line', lineId: '', unitId: '', deviceId: '', partCode: '', partName: '' })
 const lubricationFilters = reactive({
   standardCode: '',
   partCode: '',
@@ -29,17 +35,6 @@ const lubricationFilters = reactive({
   profession: '',
   oilFeedType: ''
 })
-const lubricationRows = ref([])
-const lubricationLoading = ref(false)
-const lubricationSelectedRows = ref([])
-const currentDeviceParts = ref([])
-const lubricationSelectionSyncLocked = ref(false)
-const activeDeviceRequestSeq = ref(0)
-const selectedPartCode = ref('')
-const lubricationPagination = reactive({ currentPage: 1, pageSize: 10, total: 0 })
-const lubricationDrawerVisible = ref(false)
-const lubricationDrawerMode = ref('create')
-const lubricationDrawerSaving = ref(false)
 const lubricationForm = reactive({
   id: '',
   partCode: '',
@@ -74,29 +69,27 @@ const optionOilFeedType = [
   { value: '02', label: '02-换油' },
   { value: '03', label: '03-油质化验' }
 ]
+
 function optionLabel(options, value) {
   if (value == null || value === '') return ''
-  const hit = options.find((x) => x.value === value)
-  return hit ? hit.label : String(value)
+  return options.find((x) => x.value === value)?.label || String(value)
 }
 
-const activeLine = computed(
-  () => productionLines.value.find((v) => v.id === activeLineId.value) || null
-)
-const activeUnit = computed(
-  () => activeLine.value?.units.find((v) => v.id === activeUnitId.value) || null
-)
-const activeDevice = computed(
-  () =>
-    activeUnit.value?.devices?.find((v) => String(v.id) === String(activeDeviceId.value)) || null
-)
-const mapLine = (i) => ({ id: i.id, name: i.lineName, units: [] })
-const mapUnit = (i) => ({ id: i.id, unitCode: i.unitCode, unitName: i.unitName, devices: [] })
-const mapDeviceBrief = (i) => ({
-  id: i.id,
-  equipmentName: i.equipmentName || '',
-  equipmentCode: i.equipmentCode || ''
+const activeLine = computed(() => productionLines.value.find((v) => String(v.id) === String(activeNode.lineId)) || null)
+const activeUnit = computed(() => activeLine.value?.units.find((v) => String(v.id) === String(activeNode.unitId)) || null)
+const activeDevice = computed(() => activeUnit.value?.devices.find((v) => String(v.id) === String(activeNode.deviceId)) || null)
+const activePart = computed(() => activeDevice.value?.parts.find((v) => v.partCode === activeNode.partCode) || null)
+const activeScopeLabel = computed(() => {
+  if (activeNode.type === 'part') return activePart.value?.partName || activeNode.partName || '未选择设备部位'
+  if (activeNode.type === 'device') return activeDevice.value?.equipmentName || '未选择设备'
+  if (activeNode.type === 'unit') return activeUnit.value?.unitName || '未选择设备单元'
+  return activeLine.value?.name || '未选择生产线'
 })
+
+const mapLine = (i) => ({ id: i.id, name: i.lineName, units: [] })
+const mapUnit = (i) => ({ id: i.id, unitName: i.unitName, devices: [] })
+const mapDevice = (i) => ({ id: i.id, equipmentName: i.equipmentName || '', parts: [] })
+const mapPart = (i) => ({ id: i.id, partCode: String(i.partCode || '').trim(), partName: String(i.partName || '').trim() })
 const mapLubricationRow = (i = {}) => ({
   id: i.id,
   partCode: i.partCode || '',
@@ -112,6 +105,16 @@ const mapLubricationRow = (i = {}) => ({
   nextCheckTime: i.nextCheckTime || ''
 })
 
+function resetActiveNode(payload = {}) {
+  Object.assign(activeNode, { type: 'line', lineId: '', unitId: '', deviceId: '', partCode: '', partName: '' }, payload)
+}
+function isUnitExpanded(unit) {
+  return expandedUnitIds.value.includes(unit.id)
+}
+function isDeviceExpanded(device) {
+  return expandedDeviceIds.value.includes(device.id)
+}
+
 async function loadProductionLines() {
   try {
     const res = await getProductionlineList()
@@ -121,96 +124,72 @@ async function loadProductionLines() {
     if (!e?.elMessageNotified) ElMessage.error('获取生产线列表失败')
   }
 }
-async function clickLine(line) {
-  activeLineId.value = line.id
-  activeUnitId.value = ''
-  activeDeviceId.value = ''
-  try {
-    const res = await getDeviceUtilList(line.id)
-    line.units = extractRecordsArray(res?.data).map(mapUnit)
-    expandedUnitIds.value = []
-    if (line.units.length) await clickUnit(line, line.units[0])
-  } catch (e) {
-    if (!e?.elMessageNotified) ElMessage.error('获取设备单元列表失败')
-  }
+async function loadUnits(line) {
+  const res = await getDeviceUtilList(line.id)
+  line.units = extractRecordsArray(res?.data).map(mapUnit)
 }
-async function loadDeviceBriefs(line, unit) {
-  if (!line || !unit?.unitCode) return
-  try {
-    const res = await getEquipmentListByDeviceUnitId(unit.id)
-    const list = extractRecordsArray(res?.data).map(mapDeviceBrief)
-    const targetLine = productionLines.value.find((x) => x.id === line.id)
-    const targetUnit = targetLine?.units.find((x) => x.id === unit.id)
-    if (targetUnit) targetUnit.devices = list
-  } catch {}
+async function loadDevices(unit) {
+  const res = await getEquipmentListByDeviceUnitId(unit.id)
+  unit.devices = extractRecordsArray(res?.data).map(mapDevice)
+}
+async function loadParts(device) {
+  const res = await getEquipmentPartListByEquipmentId(device.id)
+  const rawList = Array.isArray(res?.data) ? res.data : extractRecordsArray(res?.data)
+  device.parts = (rawList || []).map(mapPart).filter((x) => x.partCode || x.partName)
+}
+
+async function clickLine(line) {
+  resetActiveNode({ type: 'line', lineId: line.id })
+  lubricationFilters.partCode = ''
+  lubricationFilters.partName = ''
+  if (!line.units.length) await loadUnits(line)
+  lubricationPagination.currentPage = 1
+  await loadLubricationPage()
 }
 async function clickUnit(line, unit) {
-  activeLineId.value = line.id
-  activeUnitId.value = unit.id
-  activeDeviceId.value = ''
+  resetActiveNode({ type: 'unit', lineId: line.id, unitId: unit.id })
+  lubricationFilters.partCode = ''
+  lubricationFilters.partName = ''
   if (!expandedUnitIds.value.includes(unit.id)) expandedUnitIds.value.push(unit.id)
-  if (!unit.devices?.length) await loadDeviceBriefs(line, unit)
+  if (!unit.devices.length) await loadDevices(unit)
+  lubricationPagination.currentPage = 1
+  await loadLubricationPage()
 }
-function isUnitExpanded(unit) {
-  return expandedUnitIds.value.includes(unit.id)
+async function clickDevice(line, unit, device) {
+  resetActiveNode({ type: 'device', lineId: line.id, unitId: unit.id, deviceId: device.id })
+  lubricationFilters.partCode = ''
+  lubricationFilters.partName = ''
+  if (!expandedUnitIds.value.includes(unit.id)) expandedUnitIds.value.push(unit.id)
+  if (!device.parts.length) await loadParts(device)
+  lubricationPagination.currentPage = 1
+  await loadLubricationPage()
 }
-async function toggleUnitExpand(line, unit) {
+async function clickPart(line, unit, device, part) {
+  resetActiveNode({ type: 'part', lineId: line.id, unitId: unit.id, deviceId: device.id, partCode: part.partCode, partName: part.partName })
+  lubricationFilters.partCode = part.partCode
+  lubricationFilters.partName = part.partName
+  if (!expandedUnitIds.value.includes(unit.id)) expandedUnitIds.value.push(unit.id)
+  if (!expandedDeviceIds.value.includes(device.id)) expandedDeviceIds.value.push(device.id)
+  lubricationPagination.currentPage = 1
+  await loadLubricationPage()
+}
+async function toggleUnitExpand(unit) {
   if (isUnitExpanded(unit)) {
     expandedUnitIds.value = expandedUnitIds.value.filter((id) => id !== unit.id)
     return
   }
   expandedUnitIds.value.push(unit.id)
-  if (!unit.devices?.length) await loadDeviceBriefs(line, unit)
+  if (!unit.devices.length) await loadDevices(unit)
 }
-async function clickDevice(line, unit, device) {
-  const reqSeq = ++activeDeviceRequestSeq.value
-  activeLineId.value = line.id
-  activeUnitId.value = unit.id
-  activeDeviceId.value = device.id
-  selectedPartCode.value = ''
-  lubricationFilters.standardCode = ''
-  lubricationFilters.partCode = ''
-  lubricationFilters.partName = ''
-  let deviceCode = String(device?.equipmentCode || '').trim()
-  if (!deviceCode && device?.id) {
-    try {
-      const detailRes = await getEquipmentById(device.id)
-      if (reqSeq !== activeDeviceRequestSeq.value) return
-      deviceCode = String(detailRes?.data?.equipmentCode || '').trim()
-    } catch {}
+async function toggleDeviceExpand(device) {
+  if (isDeviceExpanded(device)) {
+    expandedDeviceIds.value = expandedDeviceIds.value.filter((id) => id !== device.id)
+    return
   }
-  if (device?.id) {
-    try {
-      const res = await getEquipmentPartListByEquipmentId(device.id)
-      if (reqSeq !== activeDeviceRequestSeq.value) return
-      const rawList = Array.isArray(res?.data) ? res.data : extractRecordsArray(res?.data)
-      const list = (rawList || [])
-        .filter((item) => item && typeof item === 'object')
-        .map((item) => ({
-          id: item.id,
-          partCode: String(item.partCode || '').trim(),
-          partName: String(item.partName || '').trim()
-        }))
-        .filter((item) => item.partCode || item.partName)
-      currentDeviceParts.value = list
-      const firstPart = list[0]
-      selectedPartCode.value = firstPart?.partCode || ''
-      lubricationFilters.partCode = firstPart?.partCode || ''
-      lubricationFilters.partName = firstPart?.partName || ''
-    } catch (e) {
-      console.error('getEquipmentPartListByEquipmentId error:', e)
-      if (reqSeq !== activeDeviceRequestSeq.value) return
-      currentDeviceParts.value = []
-      selectedPartCode.value = ''
-      lubricationFilters.partCode = ''
-      lubricationFilters.partName = ''
-      if (!e?.elMessageNotified) ElMessage.error('获取设备部位列表失败')
-    }
-  }
-  if (reqSeq !== activeDeviceRequestSeq.value) return
-  lubricationPagination.currentPage = 1
-  await loadLubricationPage()
+  expandedDeviceIds.value.push(device.id)
+  if (!device.parts.length) await loadParts(device)
 }
+
 async function loadLubricationPage() {
   lubricationLoading.value = true
   lubricationSelectionSyncLocked.value = true
@@ -218,6 +197,9 @@ async function loadLubricationPage() {
     const res = await getLubricationStandardPage({
       current: lubricationPagination.currentPage,
       size: lubricationPagination.pageSize,
+      productionLineId: activeNode.lineId || undefined,
+      deviceUnitId: ['unit', 'device', 'part'].includes(activeNode.type) ? activeNode.unitId || undefined : undefined,
+      equipmentId: ['device', 'part'].includes(activeNode.type) ? activeNode.deviceId || undefined : undefined,
       standardCode: lubricationFilters.standardCode,
       partCode: lubricationFilters.partCode,
       partName: lubricationFilters.partName,
@@ -242,12 +224,6 @@ function handleLubricationSearch() {
   lubricationPagination.currentPage = 1
   loadLubricationPage()
 }
-function handlePartChangeByCode(code) {
-  selectedPartCode.value = code || ''
-  const current = currentDeviceParts.value.find((x) => x.partCode === selectedPartCode.value)
-  lubricationFilters.partCode = current?.partCode || ''
-  lubricationFilters.partName = current?.partName || ''
-}
 function handleLubricationSelectionChange(rows) {
   if (lubricationSelectionSyncLocked.value) return
   lubricationSelectedRows.value = rows
@@ -269,24 +245,15 @@ function resetLubricationForm() {
   })
 }
 function openCreateLubricationDrawer() {
-  const currentPartCode = String(lubricationFilters.partCode || '').trim()
-  const currentPartName = String(lubricationFilters.partName || '').trim()
-  if (!currentPartCode || !currentPartName)
-    return ElMessage.warning('请先在筛选条件中指定当前设备部位编码和名称')
+  if (activeNode.type !== 'part') return ElMessage.warning('请先在左侧导航树中定位到具体设备部位后再新增')
   resetLubricationForm()
-  lubricationForm.partCode = currentPartCode
-  lubricationForm.partName = currentPartName
+  lubricationForm.partCode = activeNode.partCode
+  lubricationForm.partName = activeNode.partName
   lubricationDrawerMode.value = 'create'
   lubricationDrawerVisible.value = true
 }
-function handleDrawerPartChangeByCode(code) {
-  const current = currentDeviceParts.value.find((x) => x.partCode === code)
-  lubricationForm.partCode = current?.partCode || ''
-  lubricationForm.partName = current?.partName || ''
-}
 function openEditLubricationDrawer() {
-  if (lubricationSelectedRows.value.length !== 1)
-    return ElMessage.warning('请选择一条润滑标准进行修改')
+  if (lubricationSelectedRows.value.length !== 1) return ElMessage.warning('请选择一条润滑标准进行修改')
   Object.assign(lubricationForm, lubricationSelectedRows.value[0])
   lubricationDrawerMode.value = 'edit'
   lubricationDrawerVisible.value = true
@@ -364,39 +331,33 @@ loadProductionLines()
 <template>
   <div class="standard-page">
     <div class="page-breadcrumb">
-      {{ pageTitle }} &gt; {{ activeDevice?.equipmentName || activeUnit?.unitName || '未选择设备' }}
+      {{ pageTitle }} &gt; {{ activeScopeLabel }}
     </div>
     <div class="page-content">
       <aside class="tree-panel">
         <div class="tree-panel-header">设备树导航</div>
         <div class="tree-content">
           <div v-for="line in productionLines" :key="line.id" class="line-block">
-            <div
-              :class="['line-title', { active: line.id === activeLineId }]"
-              @click="clickLine(line)"
-            >
+            <div :class="['line-title', { active: String(line.id) === String(activeNode.lineId) && activeNode.type === 'line' }]" @click="clickLine(line)">
               {{ line.name }}
             </div>
             <div class="unit-list">
-              <div
-                v-for="unit in line.units"
-                :key="unit.id"
-                :class="['unit-item', { active: unit.id === activeUnitId }]"
-              >
+              <div v-for="unit in line.units" :key="unit.id" :class="['unit-item', { active: String(unit.id) === String(activeNode.unitId) && activeNode.type === 'unit' }]">
                 <div class="unit-row" @click="clickUnit(line, unit)">
-                  <span class="arrow" @click.stop="toggleUnitExpand(line, unit)">
-                    {{ isUnitExpanded(unit) ? '⌄' : '›' }}
-                  </span>
+                  <span class="arrow" @click.stop="toggleUnitExpand(unit)">{{ isUnitExpanded(unit) ? '⌄' : '›' }}</span>
                   <span>{{ unit.unitName }}</span>
                 </div>
                 <div v-show="isUnitExpanded(unit)" class="device-list">
-                  <div
-                    v-for="d in unit.devices"
-                    :key="d.id"
-                    :class="['device-item', { active: String(d.id) === String(activeDeviceId) }]"
-                    @click.stop="clickDevice(line, unit, d)"
-                  >
-                    {{ d.equipmentName }}
+                  <div v-for="device in unit.devices" :key="device.id" class="device-block">
+                    <div :class="['device-item', { active: String(device.id) === String(activeNode.deviceId) && activeNode.type === 'device' }]" @click.stop="clickDevice(line, unit, device)">
+                      <span class="arrow" @click.stop="toggleDeviceExpand(device)">{{ isDeviceExpanded(device) ? '⌄' : '›' }}</span>
+                      <span>{{ device.equipmentName }}</span>
+                    </div>
+                    <div v-show="isDeviceExpanded(device)" class="part-list">
+                      <div v-for="part in device.parts" :key="part.partCode" :class="['part-item', { active: part.partCode === activeNode.partCode && activeNode.type === 'part' }]" @click.stop="clickPart(line, unit, device, part)">
+                        {{ part.partName }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -407,45 +368,21 @@ loadProductionLines()
 
       <section class="table-panel">
         <div class="toolbar-row">
-          <div class="selected-device">
-            当前设备：{{ activeDevice?.equipmentCode || '--' }}
-            {{ activeDevice?.equipmentName || '--' }}
-          </div>
+          <div class="selected-device">当前定位：{{ activeScopeLabel }}</div>
         </div>
 
         <div class="filter-bar">
           <div class="filter-item">
             <span class="filter-label">标准编码</span>
-            <el-input
-              v-model="lubricationFilters.standardCode"
-              clearable
-              placeholder="请输入标准编码"
-            />
+            <el-input v-model="lubricationFilters.standardCode" clearable placeholder="请输入标准编码" />
           </div>
           <div class="filter-item">
             <span class="filter-label">部位编码</span>
-            <el-input
-              v-model="lubricationFilters.partCode"
-              disabled
-              placeholder="随部位名称自动带出"
-            />
+            <el-input v-model="lubricationFilters.partCode" :disabled="activeNode.type === 'part'" placeholder="定位到设备部位时自动带出" />
           </div>
           <div class="filter-item">
             <span class="filter-label">部位名称</span>
-            <el-select
-              v-model="selectedPartCode"
-              class="sel-full"
-              clearable
-              placeholder="请选择设备部位"
-              @change="handlePartChangeByCode"
-            >
-              <el-option
-                v-for="p in currentDeviceParts"
-                :key="p.partCode"
-                :label="`${p.partName} (${p.partCode})`"
-                :value="p.partCode"
-              />
-            </el-select>
+            <el-input v-model="lubricationFilters.partName" :disabled="activeNode.type === 'part'" placeholder="定位到设备部位时自动带出" />
           </div>
           <div class="filter-item">
             <span class="filter-label">给油点</span>
@@ -453,36 +390,18 @@ loadProductionLines()
           </div>
           <div class="filter-item">
             <span class="filter-label">油品型号</span>
-            <el-input
-              v-model="lubricationFilters.oilModels"
-              clearable
-              placeholder="请输入油品型号"
-            />
+            <el-input v-model="lubricationFilters.oilModels" clearable placeholder="请输入油品型号" />
           </div>
           <div class="filter-item">
             <span class="filter-label">专业</span>
             <el-select v-model="lubricationFilters.profession" clearable placeholder="请选择专业">
-              <el-option
-                v-for="o in optionProfession"
-                :key="o.value"
-                :label="o.label"
-                :value="o.value"
-              />
+              <el-option v-for="o in optionProfession" :key="o.value" :label="o.label" :value="o.value" />
             </el-select>
           </div>
           <div class="filter-item">
             <span class="filter-label">给油类型</span>
-            <el-select
-              v-model="lubricationFilters.oilFeedType"
-              clearable
-              placeholder="请选择给油类型"
-            >
-              <el-option
-                v-for="o in optionOilFeedType"
-                :key="o.value"
-                :label="o.label"
-                :value="o.value"
-              />
+            <el-select v-model="lubricationFilters.oilFeedType" clearable placeholder="请选择给油类型">
+              <el-option v-for="o in optionOilFeedType" :key="o.value" :label="o.label" :value="o.value" />
             </el-select>
           </div>
           <div class="filter-item">
@@ -498,12 +417,7 @@ loadProductionLines()
             :current-page="lubricationPagination.currentPage"
             :page-size="lubricationPagination.pageSize"
             :total="lubricationPagination.total"
-            @current-change="
-              (p) => {
-                lubricationPagination.currentPage = p
-                loadLubricationPage()
-              }
-            "
+            @current-change="(p) => { lubricationPagination.currentPage = p; loadLubricationPage() }"
           />
           <div class="toolbar-actions">
             <el-button type="primary" @click="openCreateLubricationDrawer">新增</el-button>
@@ -512,32 +426,15 @@ loadProductionLines()
           </div>
         </div>
 
-        <el-table
-          v-loading="lubricationLoading"
-          :data="lubricationRows"
-          border
-          class="standard-table"
-          header-cell-class-name="table-header-cell"
-          @selection-change="handleLubricationSelectionChange"
-        >
+        <el-table v-loading="lubricationLoading" :data="lubricationRows" border class="standard-table" header-cell-class-name="table-header-cell" @selection-change="handleLubricationSelectionChange">
           <el-table-column type="selection" width="48" align="center" />
           <el-table-column label="部位编码" prop="partCode" min-width="120" />
           <el-table-column label="部位名称" prop="partName" min-width="140" />
           <el-table-column label="标准编码" prop="standardCode" min-width="140" />
           <el-table-column label="标准名称" prop="standardName" min-width="170" />
-          <el-table-column label="润滑方式" min-width="180">
-            <template #default="{ row }">{{ optionLabel(optionMethod, row.method) }}</template>
-          </el-table-column>
-          <el-table-column label="专业" min-width="150">
-            <template #default="{ row }">
-              {{ optionLabel(optionProfession, row.profession) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="给油类型" min-width="150">
-            <template #default="{ row }">
-              {{ optionLabel(optionOilFeedType, row.oilFeedType) }}
-            </template>
-          </el-table-column>
+          <el-table-column label="润滑方式" min-width="180"><template #default="{ row }">{{ optionLabel(optionMethod, row.method) }}</template></el-table-column>
+          <el-table-column label="专业" min-width="150"><template #default="{ row }">{{ optionLabel(optionProfession, row.profession) }}</template></el-table-column>
+          <el-table-column label="给油类型" min-width="150"><template #default="{ row }">{{ optionLabel(optionOilFeedType, row.oilFeedType) }}</template></el-table-column>
           <el-table-column label="给油点" prop="feedPoint" min-width="180" />
           <el-table-column label="油品型号" prop="oilModels" min-width="150" />
           <el-table-column label="油量" prop="oilVolume" min-width="120" />
@@ -546,94 +443,24 @@ loadProductionLines()
       </section>
     </div>
 
-    <el-drawer
-      v-model="lubricationDrawerVisible"
-      :title="lubricationDrawerMode === 'create' ? '新增润滑标准' : '修改润滑标准'"
-      direction="rtl"
-      size="520px"
-    >
+    <el-drawer v-model="lubricationDrawerVisible" :title="lubricationDrawerMode === 'create' ? '新增润滑标准' : '修改润滑标准'" direction="rtl" size="520px">
       <el-form label-width="100px" class="drawer-form">
-        <el-form-item label="部位名称">
-          <el-select
-            v-if="lubricationDrawerMode === 'create'"
-            :model-value="lubricationForm.partCode"
-            class="sel-full"
-            placeholder="请选择设备部位"
-            @change="handleDrawerPartChangeByCode"
-          >
-            <el-option
-              v-for="p in currentDeviceParts"
-              :key="p.partCode"
-              :label="`${p.partName} (${p.partCode})`"
-              :value="p.partCode"
-            />
-          </el-select>
-          <el-input v-else v-model="lubricationForm.partName" disabled />
-        </el-form-item>
-        <el-form-item label="部位编码">
-          <el-input v-model="lubricationForm.partCode" disabled />
-        </el-form-item>
-        <el-form-item v-if="lubricationDrawerMode === 'edit'" label="标准编码">
-          <el-input v-model="lubricationForm.standardCode" disabled />
-        </el-form-item>
-        <el-form-item label="标准名称">
-          <el-input v-model="lubricationForm.standardName" />
-        </el-form-item>
-        <el-form-item label="润滑方式">
-          <el-select v-model="lubricationForm.method" class="sel-full" clearable>
-            <el-option v-for="o in optionMethod" :key="o.value" :label="o.label" :value="o.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="专业">
-          <el-select v-model="lubricationForm.profession" class="sel-full" clearable>
-            <el-option
-              v-for="o in optionProfession"
-              :key="o.value"
-              :label="o.label"
-              :value="o.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="给油类型">
-          <el-select v-model="lubricationForm.oilFeedType" class="sel-full" clearable>
-            <el-option
-              v-for="o in optionOilFeedType"
-              :key="o.value"
-              :label="o.label"
-              :value="o.value"
-            />
-          </el-select>
-        </el-form-item>
+        <el-form-item label="部位名称"><el-input v-model="lubricationForm.partName" disabled /></el-form-item>
+        <el-form-item label="部位编码"><el-input v-model="lubricationForm.partCode" disabled /></el-form-item>
+        <el-form-item v-if="lubricationDrawerMode === 'edit'" label="标准编码"><el-input v-model="lubricationForm.standardCode" disabled /></el-form-item>
+        <el-form-item label="标准名称"><el-input v-model="lubricationForm.standardName" /></el-form-item>
+        <el-form-item label="润滑方式"><el-select v-model="lubricationForm.method" class="sel-full" clearable><el-option v-for="o in optionMethod" :key="o.value" :label="o.label" :value="o.value" /></el-select></el-form-item>
+        <el-form-item label="专业"><el-select v-model="lubricationForm.profession" class="sel-full" clearable><el-option v-for="o in optionProfession" :key="o.value" :label="o.label" :value="o.value" /></el-select></el-form-item>
+        <el-form-item label="给油类型"><el-select v-model="lubricationForm.oilFeedType" class="sel-full" clearable><el-option v-for="o in optionOilFeedType" :key="o.value" :label="o.label" :value="o.value" /></el-select></el-form-item>
         <el-form-item label="给油点"><el-input v-model="lubricationForm.feedPoint" /></el-form-item>
-        <el-form-item label="油品型号">
-          <el-input v-model="lubricationForm.oilModels" />
-        </el-form-item>
+        <el-form-item label="油品型号"><el-input v-model="lubricationForm.oilModels" /></el-form-item>
         <el-form-item label="油量"><el-input v-model="lubricationForm.oilVolume" /></el-form-item>
-        <el-form-item label="下次点检">
-          <el-date-picker
-            v-model="lubricationForm.nextCheckTime"
-            type="datetime"
-            class="sel-full"
-            placeholder="请选择下次点检时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-          />
-        </el-form-item>
+        <el-form-item label="下次点检"><el-date-picker v-model="lubricationForm.nextCheckTime" type="datetime" class="sel-full" placeholder="请选择下次点检时间" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" /></el-form-item>
       </el-form>
       <template #footer>
         <div class="drawer-footer">
           <el-button @click="lubricationDrawerVisible = false">取消</el-button>
-          <el-button
-            type="primary"
-            :loading="lubricationDrawerSaving"
-            @click="
-              lubricationDrawerMode === 'create'
-                ? submitCreateLubrication()
-                : submitEditLubrication()
-            "
-          >
-            保存
-          </el-button>
+          <el-button type="primary" :loading="lubricationDrawerSaving" @click="lubricationDrawerMode === 'create' ? submitCreateLubrication() : submitEditLubrication()">保存</el-button>
         </div>
       </template>
     </el-drawer>
@@ -641,129 +468,35 @@ loadProductionLines()
 </template>
 
 <style scoped>
-.standard-page {
-  min-height: calc(100vh - 36px);
-  padding: 10px;
-  background: #f5f7fa;
-}
-.page-breadcrumb {
-  margin-bottom: 8px;
-  color: #2f3b52;
-  font-size: 14px;
-  font-weight: 700;
-}
-.page-content {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 8px;
-  min-height: calc(100vh - 90px);
-}
-.tree-panel,
-.table-panel {
-  border: 1px solid #d9e2ef;
-  background: #fff;
-}
-.tree-panel-header {
-  padding: 10px 14px;
-  border-bottom: 1px solid #e6edf6;
-  color: #33507b;
-  font-size: 13px;
-  font-weight: 700;
-}
-.tree-content {
-  padding: 10px 12px;
-}
-.line-block + .line-block {
-  margin-top: 12px;
-}
-.line-title {
-  margin-bottom: 6px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.line-title.active {
-  color: #2f76e8;
-}
-.unit-item {
-  padding: 8px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.unit-item:hover {
-  background: #f2f7ff;
-}
-.unit-item.active {
-  background: #eaf2ff;
-  color: #2f76e8;
-}
-.unit-row {
-  display: flex;
-  gap: 6px;
-  font-weight: 700;
-}
-.device-list {
-  margin-top: 4px;
-  margin-left: 18px;
-}
-.device-item {
-  padding: 3px 0;
-  color: #5a6a85;
-  font-size: 12px;
-  cursor: pointer;
-}
-.device-item.active {
-  color: #2f76e8;
-  font-weight: 700;
-}
-.table-panel {
-  padding: 10px 12px;
-  overflow: auto;
-}
-.toolbar-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-.selected-device {
-  color: #47566b;
-  font-size: 13px;
-}
-.toolbar-actions {
-  display: flex;
-  gap: 8px;
-}
-.filter-bar {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(220px, 1fr));
-  gap: 18px;
-  margin-bottom: 16px;
-}
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.filter-label {
-  min-width: 78px;
-  font-size: 13px;
-}
-.standard-table :deep(.table-header-cell) {
-  background: #e7f0ff;
-  color: #365078;
-  font-size: 12px;
-  font-weight: 700;
-}
-.sel-full {
-  width: 100%;
-  min-width: 0;
-}
-.drawer-form {
-  padding-right: 8px;
-}
-.drawer-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
+.standard-page { min-height: calc(100vh - 36px); padding: 10px; background: #f5f7fa; }
+.page-breadcrumb { margin-bottom: 8px; color: #2f3b52; font-size: 14px; font-weight: 700; }
+.page-content { display: grid; grid-template-columns: 320px 1fr; gap: 8px; min-height: calc(100vh - 90px); }
+.tree-panel, .table-panel { border: 1px solid #d9e2ef; background: #fff; }
+.tree-panel-header { padding: 10px 14px; border-bottom: 1px solid #e6edf6; color: #33507b; font-size: 13px; font-weight: 700; }
+.tree-content { padding: 10px 12px; }
+.line-block + .line-block { margin-top: 12px; }
+.line-title { margin-bottom: 6px; font-weight: 700; cursor: pointer; }
+.line-title.active { color: #2f76e8; }
+.unit-item { padding: 8px 10px; border-radius: 4px; cursor: pointer; }
+.unit-item:hover { background: #f2f7ff; }
+.unit-item.active { background: #eaf2ff; color: #2f76e8; }
+.unit-row { display: flex; gap: 6px; font-weight: 700; }
+.device-list { margin-top: 4px; margin-left: 18px; }
+.device-block { margin-top: 4px; }
+.device-item { padding: 3px 0; color: #5a6a85; font-size: 12px; cursor: pointer; display: flex; gap: 6px; }
+.device-item.active, .part-item.active { color: #2f76e8; font-weight: 700; }
+.part-list { margin-top: 4px; margin-left: 18px; }
+.part-item { padding: 3px 0; color: #5a6a85; font-size: 12px; cursor: pointer; }
+.arrow { width: 12px; display: inline-flex; justify-content: center; }
+.table-panel { padding: 10px 12px; overflow: auto; }
+.toolbar-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.selected-device { color: #47566b; font-size: 13px; }
+.toolbar-actions { display: flex; gap: 8px; }
+.filter-bar { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 18px; margin-bottom: 16px; }
+.filter-item { display: flex; align-items: center; gap: 12px; }
+.filter-label { min-width: 78px; font-size: 13px; }
+.standard-table :deep(.table-header-cell) { background: #e7f0ff; color: #365078; font-size: 12px; font-weight: 700; }
+.sel-full { width: 100%; min-width: 0; }
+.drawer-form { padding-right: 8px; }
+.drawer-footer { display: flex; justify-content: flex-end; gap: 8px; }
 </style>

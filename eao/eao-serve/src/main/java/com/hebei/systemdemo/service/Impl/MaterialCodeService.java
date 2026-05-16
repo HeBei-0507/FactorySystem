@@ -41,6 +41,8 @@ public class MaterialCodeService implements IMaterialCodeService {
         }
 
         LocalDateTime now = LocalDateTime.now();
+        materialCode.setCreatorId(currentUserId());
+        materialCode.setModifierId(currentUserId());
         materialCode.setCreatedAt(now);
         materialCode.setModifiedAt(now);
         int rows = materialCodeMapper.addMaterialCode(materialCode);
@@ -79,6 +81,7 @@ public class MaterialCodeService implements IMaterialCodeService {
             return Result.fail("物料代码已存在");
         }
 
+        materialCode.setModifierId(currentUserId());
         materialCode.setModifiedAt(LocalDateTime.now());
         int rows = materialCodeMapper.updateMaterialCode(materialCode);
         if (rows <= 0) {

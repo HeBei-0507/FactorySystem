@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { getProductionlineList } from '@/api/prodectionLine'
 import { getDeviceUtilList } from '@/api/deviceUnit'
@@ -9,7 +9,6 @@ import { getWarehouseLocationPage } from '@/api/warehouseLocation'
 import {
   addInboundRequest,
   batchDeleteInboundRequest,
-  confirmInboundRequest,
   getInboundRequestPage,
   updateInboundRequest
 } from '@/api/inboundRequest'
@@ -26,7 +25,6 @@ const us = useUserStore(),
   loading = ref(false),
   editId = ref(''),
   newId = ref(''),
-  tableRef = ref(),
   mDlg = ref(false),
   wDlg = ref(false),
   pickRow = ref(null),
@@ -129,22 +127,6 @@ function selectLine(l) {
   }
   loadPage()
 }
-async function clickLine(l) {
-  const opened = exed(l.id)
-  lineId.value = l.id
-  lineName.value = l.name
-  unitNavId.value = ''
-  pg.currentPage = 1
-  editId.value = ''
-  newId.value = ''
-  if (opened) {
-    exrm(l.id)
-    return
-  }
-  exok(l.id)
-  await loadUnits(l.id)
-  loadPage()
-}
 function clickUnit(l, u) {
   lineId.value = l.id
   lineName.value = l.name
@@ -237,13 +219,6 @@ async function removeRows() {
   ElMessage.success('删除成功')
   loadPage()
 }
-async function confirmRows() {
-  const ids = sels.value.filter((i) => !i.isNew).map((i) => i.id)
-  if (!ids.length) return ElMessage.warning('请至少选择一条已保存数据')
-  await confirmInboundRequest(ids)
-  ElMessage.success('确认入库成功')
-  loadPage()
-}
 async function openMaterial(r) {
   pickRow.value = r
   mDlg.value = true
@@ -322,14 +297,10 @@ onMounted(async () => {
             <el-button class="main-btn" type="primary" @click="saveAdd">新增</el-button>
             <el-button class="main-btn" type="primary" plain @click="saveEdit">修改</el-button>
             <el-button class="main-btn" type="danger" plain @click="removeRows">删除</el-button>
-            <el-button class="main-btn" type="warning" plain @click="confirmRows">
-              确认入库
-            </el-button>
           </div>
         </div>
         <div class="table-wrap">
           <el-table
-            ref="tableRef"
             v-loading="loading"
             :data="rows"
             size="small"

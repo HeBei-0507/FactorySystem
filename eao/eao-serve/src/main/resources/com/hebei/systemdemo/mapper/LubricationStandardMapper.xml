@@ -6,35 +6,81 @@
 <mapper namespace="com.hebei.systemdemo.mapper.LubricationStandardMapper">
 
     <select id="page" resultType="com.hebei.systemdemo.domain.po.LubricationStandard">
-        SELECT id, part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
-               feed_point, oil_models, oil_volume, next_check_time, creator_id, created_at, updated_at
-        FROM lubrication_standard
+        SELECT ls.id,
+               ls.part_code AS partCode,
+               ls.part_name AS partName,
+               ls.standard_code AS standardCode,
+               ls.standard_name AS standardName,
+               ls.method,
+               ls.profession,
+               ls.oil_feed_type AS oilFeedType,
+               ls.feed_point AS feedPoint,
+               ls.oil_models AS oilModels,
+               ls.oil_volume AS oilVolume,
+               ls.next_check_time AS nextCheckTime,
+               ls.creator_id AS creatorId,
+               ls.created_at AS createdAt,
+               ls.updated_at AS updatedAt
+        FROM lubrication_standard ls
+        LEFT JOIN equipment_part ep ON ls.part_code = ep.part_code AND ep.creator_id = ls.creator_id
+        LEFT JOIN equipment e ON ep.equipment_id = e.id AND e.creator_id = ls.creator_id
+        LEFT JOIN device_unit du ON e.device_unit_id = du.id AND du.creator_id = ls.creator_id
         <where>
-            <if test="creatorId != null">AND creator_id = #{creatorId}</if>
-            <if test="standardCode != null and standardCode != ''">AND standard_code LIKE CONCAT('%', #{standardCode}, '%')</if>
-            <if test="partCode != null and partCode != ''">AND part_code LIKE CONCAT('%', #{partCode}, '%')</if>
-            <if test="partName != null and partName != ''">AND part_name LIKE CONCAT('%', #{partName}, '%')</if>
-            <if test="feedPoint != null and feedPoint != ''">AND feed_point LIKE CONCAT('%', #{feedPoint}, '%')</if>
-            <if test="oilModels != null and oilModels != ''">AND oil_models LIKE CONCAT('%', #{oilModels}, '%')</if>
-            <if test="profession != null and profession != ''">AND profession = #{profession}</if>
-            <if test="oilFeedType != null and oilFeedType != ''">AND oil_feed_type = #{oilFeedType}</if>
+            <if test="creatorId != null">AND ls.creator_id = #{creatorId}</if>
+            <if test="productionLineId != null">AND du.production_line_id = #{productionLineId}</if>
+            <if test="deviceUnitId != null">AND e.device_unit_id = #{deviceUnitId}</if>
+            <if test="equipmentId != null">AND ep.equipment_id = #{equipmentId}</if>
+            <if test="standardCode != null and standardCode != ''">AND ls.standard_code LIKE CONCAT('%', #{standardCode}, '%')</if>
+            <if test="partCode != null and partCode != ''">AND ls.part_code LIKE CONCAT('%', #{partCode}, '%')</if>
+            <if test="partName != null and partName != ''">AND ls.part_name LIKE CONCAT('%', #{partName}, '%')</if>
+            <if test="feedPoint != null and feedPoint != ''">AND ls.feed_point LIKE CONCAT('%', #{feedPoint}, '%')</if>
+            <if test="oilModels != null and oilModels != ''">AND ls.oil_models LIKE CONCAT('%', #{oilModels}, '%')</if>
+            <if test="profession != null and profession != ''">AND ls.profession = #{profession}</if>
+            <if test="oilFeedType != null and oilFeedType != ''">AND ls.oil_feed_type = #{oilFeedType}</if>
         </where>
-        ORDER BY id DESC
+        ORDER BY ls.id DESC
     </select>
 
     <select id="list" resultType="com.hebei.systemdemo.domain.po.LubricationStandard">
-        SELECT id, part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
-               feed_point, oil_models, oil_volume, next_check_time, creator_id, created_at, updated_at
+        SELECT id,
+               part_code AS partCode,
+               part_name AS partName,
+               standard_code AS standardCode,
+               standard_name AS standardName,
+               method,
+               profession,
+               oil_feed_type AS oilFeedType,
+               feed_point AS feedPoint,
+               oil_models AS oilModels,
+               oil_volume AS oilVolume,
+               next_check_time AS nextCheckTime,
+               creator_id AS creatorId,
+               created_at AS createdAt,
+               updated_at AS updatedAt
         FROM lubrication_standard
         <where>
             <if test="partCode != null and partCode != ''">AND part_code = #{partCode}</if>
             <if test="standardCode != null and standardCode != ''">AND standard_code = #{standardCode}</if>
+            <if test="creatorId != null">AND creator_id = #{creatorId}</if>
         </where>
     </select>
 
     <select id="getById" resultType="com.hebei.systemdemo.domain.po.LubricationStandard">
-        SELECT id, part_code, part_name, standard_code, standard_name, method, profession, oil_feed_type,
-               feed_point, oil_models, oil_volume, next_check_time, creator_id, created_at, updated_at
+        SELECT id,
+               part_code AS partCode,
+               part_name AS partName,
+               standard_code AS standardCode,
+               standard_name AS standardName,
+               method,
+               profession,
+               oil_feed_type AS oilFeedType,
+               feed_point AS feedPoint,
+               oil_models AS oilModels,
+               oil_volume AS oilVolume,
+               next_check_time AS nextCheckTime,
+               creator_id AS creatorId,
+               created_at AS createdAt,
+               updated_at AS updatedAt
         FROM lubrication_standard
         WHERE id = #{id}
         <if test="creatorId != null">
@@ -60,24 +106,29 @@
         </trim>
     </insert>
 
-    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.LubricationStandard">
+    <update id="updateById">
         UPDATE lubrication_standard
         <set>
-            <if test="partCode != null and partCode != ''">part_code = #{partCode},</if>
-            <if test="partName != null">part_name = #{partName},</if>
-            <if test="standardCode != null and standardCode != ''">standard_code = #{standardCode},</if>
-            <if test="standardName != null and standardName != ''">standard_name = #{standardName},</if>
-            <if test="method != null and method != ''">method = #{method},</if>
-            <if test="profession != null and profession != ''">profession = #{profession},</if>
-            <if test="oilFeedType != null and oilFeedType != ''">oil_feed_type = #{oilFeedType},</if>
-            <if test="feedPoint != null and feedPoint != ''">feed_point = #{feedPoint},</if>
-            <if test="oilModels != null and oilModels != ''">oil_models = #{oilModels},</if>
-            <if test="oilVolume != null and oilVolume != ''">oil_volume = #{oilVolume},</if>
-            <if test="nextCheckTime != null">next_check_time = #{nextCheckTime},</if>
-            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+            <if test="record.partCode != null and record.partCode != ''">part_code = #{record.partCode},</if>
+            <if test="record.partName != null">part_name = #{record.partName},</if>
+            <if test="record.standardCode != null and record.standardCode != ''">standard_code = #{record.standardCode},</if>
+            <if test="record.standardName != null and record.standardName != ''">standard_name = #{record.standardName},</if>
+            <if test="record.method != null and record.method != ''">method = #{record.method},</if>
+            <if test="record.profession != null and record.profession != ''">profession = #{record.profession},</if>
+            <if test="record.oilFeedType != null and record.oilFeedType != ''">oil_feed_type = #{record.oilFeedType},</if>
+            <if test="record.feedPoint != null and record.feedPoint != ''">feed_point = #{record.feedPoint},</if>
+            <if test="record.oilModels != null and record.oilModels != ''">oil_models = #{record.oilModels},</if>
+            <if test="record.oilVolume != null and record.oilVolume != ''">oil_volume = #{record.oilVolume},</if>
+            <if test="record.nextCheckTime != null">next_check_time = #{record.nextCheckTime},</if>
+            <if test="record.updatedAt != null">updated_at = #{record.updatedAt},</if>
         </set>
-        WHERE id = #{id}
+        WHERE id = #{record.id}
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
     </update>
 
-    <delete id="deleteById">DELETE FROM lubrication_standard WHERE id = #{id}</delete>
+    <delete id="deleteById">
+        DELETE FROM lubrication_standard
+        WHERE id = #{id}
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+    </delete>
 </mapper>

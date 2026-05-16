@@ -44,6 +44,18 @@ public class InspectionRecordService implements IInspectionRecordService {
         return Result.ok(data);
     }
 
+    @Override
+    public Result planSummaryPage(Integer current, Integer size, Long productionLineId, String routeName, String planSource) {
+        if (currentUserId() == null) return Result.fail("未登录，请先登录");
+        if (current == null || current < 1) return Result.fail("当前页码必须大于等于1");
+        if (size == null || size < 1) return Result.fail("每页条数必须大于等于1");
+        Page<InspectionRecord> page = PageHelper.startPage(current, size);
+        List<InspectionRecord> records = inspectionRecordMapper.planSummaryPage(productionLineId, trimToNull(routeName), trimToNull(planSource), currentUserId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("records", records); data.put("total", page.getTotal()); data.put("current", current); data.put("size", size);
+        return Result.ok(data);
+    }
+
     @Override public Result getById(Long id) {
         if (currentUserId() == null) return Result.fail("未登录，请先登录");
         if (id == null) return Result.fail(ResultCode.BAD_REQUEST, "点检实绩ID不能为空");

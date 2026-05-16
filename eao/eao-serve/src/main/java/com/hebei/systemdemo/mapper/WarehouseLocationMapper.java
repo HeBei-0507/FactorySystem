@@ -29,7 +29,9 @@ public interface WarehouseLocationMapper {
 
     int add(WarehouseLocation warehouseLocation);
 
-    int updateById(WarehouseLocation warehouseLocation);
+    int updateById(@Param("record") WarehouseLocation warehouseLocation,
+                   @Param("creatorId") Long creatorId);
 
-    int batchDeleteByIds(@Param("ids") List<Long> ids);
+    int batchDeleteByIds(@Param("ids") List<Long> ids,
+                         @Param("creatorId") Long creatorId);
 }

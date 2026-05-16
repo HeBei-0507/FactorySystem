@@ -43,4 +43,7 @@ public class InspectionRecord {
     private String creatorName;
     private String createdAt;
     private String updatedAt;
+    private Integer totalCount;
+    private Integer inspectedCount;
+    private Integer remainingCount;
 }

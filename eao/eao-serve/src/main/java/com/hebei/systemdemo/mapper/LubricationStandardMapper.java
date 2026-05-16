@@ -9,7 +9,10 @@ import java.util.List;
 @Mapper
 public interface LubricationStandardMapper {
 
-    List<LubricationStandard> page(@Param("standardCode") String standardCode,
+    List<LubricationStandard> page(@Param("productionLineId") Long productionLineId,
+                                   @Param("deviceUnitId") Long deviceUnitId,
+                                   @Param("equipmentId") Long equipmentId,
+                                   @Param("standardCode") String standardCode,
                                    @Param("partCode") String partCode,
                                    @Param("partName") String partName,
                                    @Param("feedPoint") String feedPoint,
@@ -25,7 +28,9 @@ public interface LubricationStandardMapper {
 
     int add(LubricationStandard lubricationStandard);
 
-    int updateById(LubricationStandard lubricationStandard);
+    int updateById(@Param("record") LubricationStandard lubricationStandard,
+                   @Param("creatorId") Long creatorId);
 
-    int deleteById(Long id);
+    int deleteById(@Param("id") Long id,
+                   @Param("creatorId") Long creatorId);
 }

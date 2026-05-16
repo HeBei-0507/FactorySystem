@@ -71,13 +71,15 @@ const title = computed(() => (mode.value === 'create' ? '故障录入' : '故障
   t = (v) => String(v ?? '').trim(),
   lab = (a, v) => a.find((i) => i.value === v)?.label || v || ''
 const p = (v) => String(v).padStart(2, '0')
+const ms = (v) => String(v).padStart(3, '0')
 const now = () => {
   const d = new Date()
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
 }
 const code = () => {
   const d = new Date()
-  return `GZ${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
+  const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+  return `GZ${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}${ms(d.getMilliseconds())}${random}`
 }
 function init() {
   const u = userStore.profile || getUserProfile() || {}

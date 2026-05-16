@@ -564,8 +564,8 @@ create table warehouse_location
     creator_id         bigint          null comment '创建人ID',
     created_at         varchar(32)     null comment '创建日期',
     updated_at         varchar(32)     null comment '更新时间',
-    constraint uk_warehouse_location_line_area_location
-        unique (production_line_id, area_code, location_code),
+    constraint uk_warehouse_location_line_area_location_creator
+        unique (production_line_id, area_code, location_code, creator_id),
     constraint fk_warehouse_location_line_id
         foreign key (production_line_id) references production_line (id)
 )
@@ -731,21 +731,22 @@ create index idx_mst_standard_id
 -- Table structure for maintenance_standard_safety_tag
 -- ----------------------------
 DROP TABLE IF EXISTS `maintenance_standard_safety_tag`
-create table maintenance_standard_safety_tag
+create table maintenance_ticket_safety_tag
 (
     id              bigint auto_increment comment '主键ID'
         primary key,
-    standard_id     bigint       not null comment '检修标准ID',
+    ticket_id       bigint       not null comment '工单ID',
     tag_nature      varchar(100) null comment '安全牌性质',
     tag_location    varchar(100) null comment '挂牌位置',
     tag_device_code varchar(100) null comment '挂牌设备编码',
-    created_at      datetime     null comment '创建时间',
-    updated_at      datetime     null comment '更新时间'
+    created_at      varchar(32)  null comment '创建时间',
+    updated_at      varchar(32)  null comment '更新时间'
 )
-    comment '检修标准-安全挂牌明细表' collate = utf8mb4_general_ci;
+    comment '工单安全挂牌明细表';
 
-create index idx_msst_standard_id
-    on maintenance_standard_safety_tag (standard_id);
+create index idx_ticket_id
+    on maintenance_ticket_safety_tag (ticket_id);
+
 
 -- ----------------------------
 -- Table structure for maintenance_plan
@@ -855,22 +856,26 @@ create index idx_ticket_code
 -- Table structure for maintenance_ticket_spare_part
 -- ----------------------------
 DROP TABLE IF EXISTS `maintenance_ticket_spare_part`;
-CREATE TABLE `maintenance_ticket_spare_part` (
-                                                 `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-                                                 `ticket_id` BIGINT NOT NULL COMMENT '工单ID',
-                                                 `material_code_id` BIGINT DEFAULT NULL COMMENT '物料代码ID快照',
-                                                 `inbound_request_id` BIGINT DEFAULT NULL COMMENT '入库申请ID快照',
-                                                 `material_code` VARCHAR(100) DEFAULT NULL COMMENT '物料代码',
-                                                 `material_name` VARCHAR(100) DEFAULT NULL COMMENT '物料名称',
-                                                 `material_sub_category` VARCHAR(100) DEFAULT NULL COMMENT '物料分类',
-                                                 `model_specification` VARCHAR(100) DEFAULT NULL COMMENT '规格型号',
-                                                 `quantity` INT DEFAULT NULL COMMENT '数量',
-                                                 `quantity_unit` VARCHAR(50) DEFAULT NULL COMMENT '数量单位',
-                                                 `created_at` VARCHAR(32) DEFAULT NULL COMMENT '创建时间',
-                                                 `updated_at` VARCHAR(32) DEFAULT NULL COMMENT '更新时间',
-                                                 PRIMARY KEY (`id`),
-                                                 KEY `idx_ticket_id` (`ticket_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工单备件明细表';
+create table maintenance_ticket_spare_part
+(
+    id                    bigint auto_increment comment '主键ID'
+        primary key,
+    ticket_id             bigint       not null comment '工单ID',
+    material_code_id      bigint       null comment '物料代码ID快照',
+    inbound_request_id    bigint       null comment '入库申请ID快照',
+    material_code         varchar(100) null comment '物料代码',
+    material_name         varchar(100) null comment '物料名称',
+    material_sub_category varchar(100) null comment '物料分类',
+    model_specification   varchar(100) null comment '规格型号',
+    quantity              int          null comment '数量',
+    quantity_unit         varchar(50)  null comment '数量单位',
+    created_at            varchar(32)  null comment '创建时间',
+    updated_at            varchar(32)  null comment '更新时间'
+)
+    comment '工单备件明细表';
+
+create index idx_ticket_id
+    on maintenance_ticket_spare_part (ticket_id);
 
 -- ----------------------------
 -- Table structure for maintenance_ticket_tool

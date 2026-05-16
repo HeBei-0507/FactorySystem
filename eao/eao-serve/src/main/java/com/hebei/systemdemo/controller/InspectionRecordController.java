@@ -36,6 +36,16 @@ public class InspectionRecordController {
     }
 
     @RequireLogin
+    @GetMapping("/planSummaryPage")
+    public Result planSummaryPage(@RequestParam Integer current,
+                                  @RequestParam Integer size,
+                                  @RequestParam(required = false) Long productionLineId,
+                                  @RequestParam(required = false) String routeName,
+                                  @RequestParam(required = false) String planSource) {
+        return inspectionRecordService.planSummaryPage(current, size, productionLineId, routeName, planSource);
+    }
+
+    @RequireLogin
     @GetMapping("/{id}")
     public Result getById(@PathVariable Long id) {
         return inspectionRecordService.getById(id);

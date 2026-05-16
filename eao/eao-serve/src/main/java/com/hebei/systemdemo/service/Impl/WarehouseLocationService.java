@@ -103,7 +103,7 @@ public class WarehouseLocationService implements IWarehouseLocationService {
         }
         warehouseLocation.setProductionLineId(exist.getProductionLineId());
         warehouseLocation.setUpdatedAt(nowString());
-        int rows = warehouseLocationMapper.updateById(warehouseLocation);
+        int rows = warehouseLocationMapper.updateById(warehouseLocation, currentUserId());
         if (rows <= 0) {
             return Result.fail("更新库区库位失败");
         }
@@ -124,7 +124,7 @@ public class WarehouseLocationService implements IWarehouseLocationService {
                 return Result.fail(ResultCode.NOT_FOUND, "存在不存在或无权限的库区库位");
             }
         }
-        int rows = warehouseLocationMapper.batchDeleteByIds(ids);
+        int rows = warehouseLocationMapper.batchDeleteByIds(ids, currentUserId());
         if (rows <= 0) {
             return Result.fail("删除库区库位失败");
         }

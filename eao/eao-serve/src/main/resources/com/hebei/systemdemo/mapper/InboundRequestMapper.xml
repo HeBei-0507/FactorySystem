@@ -73,36 +73,41 @@
         )
     </insert>
 
-    <update id="updateById" parameterType="com.hebei.systemdemo.domain.po.InboundRequest">
+    <update id="updateById">
         UPDATE inbound_request
         <set>
-            <if test="materialCodeId != null">material_code_id = #{materialCodeId},</if>
-            <if test="materialCode != null and materialCode != ''">material_code = #{materialCode},</if>
-            <if test="materialName != null and materialName != ''">material_name = #{materialName},</if>
-            <if test="modelSpecification != null">model_specification = #{modelSpecification},</if>
-            <if test="warehouseLocationId != null">warehouse_location_id = #{warehouseLocationId},</if>
-            <if test="areaCode != null and areaCode != ''">area_code = #{areaCode},</if>
-            <if test="locationCode != null and locationCode != ''">location_code = #{locationCode},</if>
-            <if test="inboundQty != null">inbound_qty = #{inboundQty},</if>
-            <if test="unitPrice != null">unit_price = #{unitPrice},</if>
-            <if test="inboundAmount != null">inbound_amount = #{inboundAmount},</if>
-            <if test="inventoryProperty != null and inventoryProperty != ''">inventory_property = #{inventoryProperty},</if>
-            <if test="inboundType != null and inboundType != ''">inbound_type = #{inboundType},</if>
-            <if test="inboundDate != null and inboundDate != ''">inbound_date = #{inboundDate},</if>
-            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+            <if test="request.materialCodeId != null">material_code_id = #{request.materialCodeId},</if>
+            <if test="request.materialCode != null and request.materialCode != ''">material_code = #{request.materialCode},</if>
+            <if test="request.materialName != null and request.materialName != ''">material_name = #{request.materialName},</if>
+            <if test="request.modelSpecification != null">model_specification = #{request.modelSpecification},</if>
+            <if test="request.warehouseLocationId != null">warehouse_location_id = #{request.warehouseLocationId},</if>
+            <if test="request.areaCode != null and request.areaCode != ''">area_code = #{request.areaCode},</if>
+            <if test="request.locationCode != null and request.locationCode != ''">location_code = #{request.locationCode},</if>
+            <if test="request.inboundQty != null">inbound_qty = #{request.inboundQty},</if>
+            <if test="request.unitPrice != null">unit_price = #{request.unitPrice},</if>
+            <if test="request.inboundAmount != null">inbound_amount = #{request.inboundAmount},</if>
+            <if test="request.inventoryProperty != null and request.inventoryProperty != ''">inventory_property = #{request.inventoryProperty},</if>
+            <if test="request.inboundType != null and request.inboundType != ''">inbound_type = #{request.inboundType},</if>
+            <if test="request.inboundDate != null and request.inboundDate != ''">inbound_date = #{request.inboundDate},</if>
+            <if test="request.updatedAt != null">updated_at = #{request.updatedAt},</if>
         </set>
-        WHERE id = #{id}
+        WHERE id = #{request.id}
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
     </update>
 
     <update id="confirmByIds">
         UPDATE inbound_request
         SET inbound_status = '10-已确认入库', updated_at = #{updatedAt}
-        WHERE id IN
+        WHERE
+        <if test="creatorId != null">creator_id = #{creatorId} AND </if>
+        id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
     </update>
 
     <delete id="batchDeleteByIds">
-        DELETE FROM inbound_request WHERE id IN
+        DELETE FROM inbound_request WHERE
+        <if test="creatorId != null">creator_id = #{creatorId} AND </if>
+        id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
     </delete>
 </mapper>

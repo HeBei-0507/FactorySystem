@@ -172,6 +172,12 @@ const router = createRouter({
       name: 'InboundRequest',
       component: () => import('@/views/MaterialManage/InboundRequest.vue'),
       meta: { title: '入库申请' }
+    },
+    {
+      path: '/material-manage/inbound-approve',
+      name: 'InboundApprove',
+      component: () => import('@/views/MaterialManage/InboundApprove.vue'),
+      meta: { title: '入库审核' }
     }
   ]
 })

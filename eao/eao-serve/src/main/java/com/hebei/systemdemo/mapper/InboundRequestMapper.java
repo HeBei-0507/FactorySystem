@@ -25,10 +25,13 @@ public interface InboundRequestMapper {
 
     int add(InboundRequest inboundRequest);
 
-    int updateById(InboundRequest inboundRequest);
+    int updateById(@Param("request") InboundRequest inboundRequest,
+                   @Param("creatorId") Long creatorId);
 
     int confirmByIds(@Param("ids") List<Long> ids,
-                     @Param("updatedAt") String updatedAt);
+                     @Param("updatedAt") String updatedAt,
+                     @Param("creatorId") Long creatorId);
 
-    int batchDeleteByIds(@Param("ids") List<Long> ids);
+    int batchDeleteByIds(@Param("ids") List<Long> ids,
+                         @Param("creatorId") Long creatorId);
 }

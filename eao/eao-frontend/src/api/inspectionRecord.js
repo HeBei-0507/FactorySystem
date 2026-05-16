@@ -4,6 +4,10 @@ export const getInspectionRecordPage = (params) => {
   return request.get('/inspectionRecord/page', { params })
 }
 
+export const getInspectionPlanSummaryPage = (params) => {
+  return request.get('/inspectionRecord/planSummaryPage', { params })
+}
+
 export const getInspectionRecordById = (id) => {
   return request.get(`/inspectionRecord/${id}`)
 }

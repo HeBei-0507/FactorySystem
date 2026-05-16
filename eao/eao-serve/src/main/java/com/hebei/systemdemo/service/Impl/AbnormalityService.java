@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AbnormalityService implements IAbnormalityService {
@@ -81,10 +82,8 @@ public class AbnormalityService implements IAbnormalityService {
     @Override
     public Result add(Abnormality abnormality) {
         normalize(abnormality);
-        if (!StringUtils.hasText(abnormality.getAbnormalCode())) {
-            return Result.fail("异常单编号不能为空");
-        }
         fillCreatorInfo(abnormality);
+        abnormality.setAbnormalCode(generateAbnormalCode());
         if (!StringUtils.hasText(abnormality.getReporter())) {
             abnormality.setReporter(abnormality.getCreatorName());
         }
@@ -238,5 +237,11 @@ public class AbnormalityService implements IAbnormalityService {
 
     private String nowString() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    private String generateAbnormalCode() {
+        return "YC"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"))
+                + String.format("%03d", ThreadLocalRandom.current().nextInt(1000));
     }
 }
